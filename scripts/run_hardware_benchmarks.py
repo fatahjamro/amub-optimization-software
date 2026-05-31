@@ -113,22 +113,26 @@ def main():
             # 2. GPU Taylor Timing
             if gpu_available and gpu_device != "cpu":
                 print(f"  GPU ({gpu_device}) {dtype_name} with Taylor series fallback...")
-                gpu_time = run_timing_trial(
-                    d=d,
-                    n=n_bases,
-                    dtype_name=dtype_name,
-                    matrix_exp_backend="taylor",
-                    device_name=gpu_device,
-                    steps=steps
-                )
-                row[f"gpu_{dtype_name}_seconds"] = gpu_time
-                raw_timing_records.append({
-                    "dimension": d,
-                    "dtype": dtype_name,
-                    "backend": gpu_device,
-                    "elapsed_seconds": gpu_time,
-                    "steps": steps,
-                })
+                try:
+                    gpu_time = run_timing_trial(
+                        d=d,
+                        n=n_bases,
+                        dtype_name=dtype_name,
+                        matrix_exp_backend="taylor",
+                        device_name=gpu_device,
+                        steps=steps
+                    )
+                    row[f"gpu_{dtype_name}_seconds"] = gpu_time
+                    raw_timing_records.append({
+                        "dimension": d,
+                        "dtype": dtype_name,
+                        "backend": gpu_device,
+                        "elapsed_seconds": gpu_time,
+                        "steps": steps,
+                    })
+                except Exception as e:
+                    print(f"    GPU ({gpu_device}) {dtype_name} is unsupported or encountered an error: {e}")
+                    row[f"gpu_{dtype_name}_seconds"] = "N/A"
             else:
                 row[f"gpu_{dtype_name}_seconds"] = "N/A"
                 

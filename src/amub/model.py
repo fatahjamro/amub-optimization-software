@@ -31,7 +31,7 @@ class UnanchoredAMUBModel(nn.Module):
         # Trainable complex parameters A_k initialized as unconstrained random complex matrices
         self.params = nn.ParameterList([
             nn.Parameter(
-                init_scale * torch.randn(d, d, dtype=dtype, device=self.device)
+                (init_scale * torch.randn(d, d, dtype=dtype, device="cpu")).to(self.device)
             )
             for _ in range(n_bases)
         ])
