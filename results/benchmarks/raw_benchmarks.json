@@ -1,0 +1,107 @@
+[
+  {
+    "dimension": 6,
+    "dtype": "complex128",
+    "backend": "cpu",
+    "elapsed_seconds": 2.2124779999721795,
+    "steps": 1000
+  },
+  {
+    "dimension": 6,
+    "dtype": "complex64",
+    "backend": "cpu",
+    "elapsed_seconds": 2.194791957968846,
+    "steps": 1000
+  },
+  {
+    "dimension": 6,
+    "dtype": "complex64",
+    "backend": "mps",
+    "elapsed_seconds": 45.63978545810096,
+    "steps": 1000
+  },
+  {
+    "dimension": 12,
+    "dtype": "complex128",
+    "backend": "cpu",
+    "elapsed_seconds": 2.7386389169842005,
+    "steps": 1000
+  },
+  {
+    "dimension": 12,
+    "dtype": "complex64",
+    "backend": "cpu",
+    "elapsed_seconds": 2.5066134580411017,
+    "steps": 1000
+  },
+  {
+    "dimension": 12,
+    "dtype": "complex64",
+    "backend": "mps",
+    "elapsed_seconds": 47.412106666946784,
+    "steps": 1000
+  },
+  {
+    "dimension": 24,
+    "dtype": "complex128",
+    "backend": "cpu",
+    "elapsed_seconds": 4.131619791965932,
+    "steps": 1000
+  },
+  {
+    "dimension": 24,
+    "dtype": "complex64",
+    "backend": "cpu",
+    "elapsed_seconds": 3.624629416037351,
+    "steps": 1000
+  },
+  {
+    "dimension": 24,
+    "dtype": "complex64",
+    "backend": "mps",
+    "elapsed_seconds": 48.38297195802443,
+    "steps": 1000
+  },
+  {
+    "dimension": 48,
+    "dtype": "complex128",
+    "backend": "cpu",
+    "elapsed_seconds": 12.409588291775435,
+    "steps": 1000
+  },
+  {
+    "dimension": 48,
+    "dtype": "complex64",
+    "backend": "cpu",
+    "elapsed_seconds": 9.923796707997099,
+    "steps": 1000
+  },
+  {
+    "dimension": 48,
+    "dtype": "complex64",
+    "backend": "mps",
+    "elapsed_seconds": 47.901736167026684,
+    "steps": 1000
+  },
+  {
+    "dimension": 96,
+    "dtype": "complex128",
+    "backend": "cpu",
+    "elapsed_seconds": 69.27099141711369,
+    "steps": 1000
+  },
+  {
+    "dimension": 96,
+    "dtype": "complex64",
+    "backend": "cpu",
+    "elapsed_seconds": 42.409758375026286,
+    "steps": 1000
+  },
+  {
+    "dimension": 96,
+    "dtype": "complex64",
+    "backend": "mps",
+    "elapsed_seconds": 49.44163337512873,
+    "steps": 1000
+  }
+]
