@@ -1,0 +1,6 @@
+marimo[recommended]
+galois
+numpy<2.4
+pandas
+scipy
+pytorch

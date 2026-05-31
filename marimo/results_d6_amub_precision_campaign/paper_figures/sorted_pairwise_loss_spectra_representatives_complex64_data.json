@@ -1,0 +1,131 @@
+{
+  "n3_exact_or_near_exact": {
+    "n_bases": 3,
+    "seed": 1,
+    "best_loss": 3.5638159090467525e-13,
+    "num_near_exact_pairs": 3,
+    "pair_losses_sorted": [
+      2.3292479056635784e-13,
+      1.6853185513809876e-13,
+      1.2678746941219288e-13
+    ],
+    "pair_labels_sorted": [
+      "(0,1)",
+      "(0,2)",
+      "(1,2)"
+    ],
+    "diagnostics_path": "results_d6_amub_precision_campaign/d6_n3_complex64_seed1/pairwise_diagnostics.json"
+  },
+  "n3_defective_triangle": {
+    "n_bases": 3,
+    "seed": 3,
+    "best_loss": 0.05124921351671219,
+    "num_near_exact_pairs": 0,
+    "pair_losses_sorted": [
+      0.017083099111914635,
+      0.01708308607339859,
+      0.017083073034882545
+    ],
+    "pair_labels_sorted": [
+      "(1,2)",
+      "(0,2)",
+      "(0,1)"
+    ],
+    "diagnostics_path": "results_d6_amub_precision_campaign/d6_n3_complex64_seed3/pairwise_diagnostics.json"
+  },
+  "n4_hub_and_triangle": {
+    "n_bases": 4,
+    "seed": 3,
+    "best_loss": 0.05124921351671219,
+    "num_near_exact_pairs": 3,
+    "pair_losses_sorted": [
+      0.01708308607339859,
+      0.017083074897527695,
+      0.017083067446947098,
+      6.017408793468348e-13,
+      4.1033842990145786e-13,
+      3.9523939676655573e-13
+    ],
+    "pair_labels_sorted": [
+      "(0,3)",
+      "(2,3)",
+      "(0,2)",
+      "(0,1)",
+      "(1,3)",
+      "(1,2)"
+    ],
+    "diagnostics_path": "results_d6_amub_precision_campaign/d6_n4_complex64_seed3/pairwise_diagnostics.json"
+  },
+  "n5_best_fully_defective": {
+    "n_bases": 5,
+    "seed": 3,
+    "best_loss": 0.35963666439056396,
+    "num_near_exact_pairs": 0,
+    "pair_losses_sorted": [
+      0.23926034569740295,
+      0.018705714493989944,
+      0.01726582646369934,
+      0.017055926844477654,
+      0.01464372780174017,
+      0.01394127681851387,
+      0.010384930297732353,
+      0.009818638674914837,
+      0.009520712308585644,
+      0.009039652533829212
+    ],
+    "pair_labels_sorted": [
+      "(0,2)",
+      "(1,4)",
+      "(1,3)",
+      "(3,4)",
+      "(0,3)",
+      "(2,3)",
+      "(2,4)",
+      "(1,2)",
+      "(0,4)",
+      "(0,1)"
+    ],
+    "diagnostics_path": "results_d6_amub_precision_campaign/d6_n5_complex64_seed3/pairwise_diagnostics.json"
+  },
+  "n6_best_low_loss": {
+    "n_bases": 6,
+    "seed": 4,
+    "best_loss": 0.8685318827629089,
+    "num_near_exact_pairs": 0,
+    "pair_losses_sorted": [
+      0.14278888702392578,
+      0.1427888572216034,
+      0.14278852939605713,
+      0.04741807281970978,
+      0.04741800203919411,
+      0.04741791635751724,
+      0.04734773561358452,
+      0.04734768718481064,
+      0.047347649931907654,
+      0.03205191344022751,
+      0.03205190598964691,
+      0.03205177187919617,
+      0.0242217518389225,
+      0.024198872968554497,
+      0.011292457580566406
+    ],
+    "pair_labels_sorted": [
+      "(0,3)",
+      "(0,5)",
+      "(3,5)",
+      "(0,1)",
+      "(1,3)",
+      "(1,5)",
+      "(2,3)",
+      "(0,2)",
+      "(2,5)",
+      "(3,4)",
+      "(4,5)",
+      "(0,4)",
+      "(2,4)",
+      "(1,4)",
+      "(1,2)"
+    ],
+    "diagnostics_path": "results_d6_amub_precision_campaign/d6_n6_complex64_seed4/pairwise_diagnostics.json"
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "n3_exact_or_near_exact": {
+    "representative": {
+      "d": 6,
+      "n_bases": 3,
+      "dtype": "complex128",
+      "seed": 0,
+      "best_loss": 3.9550897337936275e-30,
+      "num_near_exact_pairs": 3,
+      "num_defective_pairs": 0,
+      "max_unitarity_residual": 3.186527902776202e-15,
+      "run_dir": "results_d6_amub_precision_campaign/d6_n3_complex128_seed0",
+      "pairwise_overlaps_path": "results_d6_amub_precision_campaign/d6_n3_complex128_seed0/pairwise_overlaps.npz",
+      "pairwise_diagnostics_path": "results_d6_amub_precision_campaign/d6_n3_complex128_seed0/pairwise_diagnostics.json",
+      "metadata_path": "results_d6_amub_precision_campaign/d6_n3_complex128_seed0/run_metadata.json"
+    },
+    "figure": {
+      "png": "results_d6_amub_precision_campaign/heatmap_figures_representative_runs/n3_exact_or_near_exact_d6_n3_seed0.png",
+      "pdf": "results_d6_amub_precision_campaign/heatmap_figures_representative_runs/n3_exact_or_near_exact_d6_n3_seed0.pdf",
+      "num_pairs": 3
+    }
+  },
+  "n3_defective_triangle": {
+    "representative": {
+      "d": 6,
+      "n_bases": 3,
+      "dtype": "complex128",
+      "seed": 2,
+      "best_loss": 0.05124921899628365,
+      "num_near_exact_pairs": 0,
+      "num_defective_pairs": 3,
+      "max_unitarity_residual": 4.605892473657455e-15,
+      "run_dir": "results_d6_amub_precision_campaign/d6_n3_complex128_seed2",
+      "pairwise_overlaps_path": "results_d6_amub_precision_campaign/d6_n3_complex128_seed2/pairwise_overlaps.npz",
+      "pairwise_diagnostics_path": "results_d6_amub_precision_campaign/d6_n3_complex128_seed2/pairwise_diagnostics.json",
+      "metadata_path": "results_d6_amub_precision_campaign/d6_n3_complex128_seed2/run_metadata.json"
+    },
+    "figure": {
+      "png": "results_d6_amub_precision_campaign/heatmap_figures_representative_runs/n3_defective_triangle_d6_n3_seed2.png",
+      "pdf": "results_d6_amub_precision_campaign/heatmap_figures_representative_runs/n3_defective_triangle_d6_n3_seed2.pdf",
+      "num_pairs": 3
+    }
+  },
+  "n4_hub_and_triangle": {
+    "representative": {
+      "d": 6,
+      "n_bases": 4,
+      "dtype": "complex128",
+      "seed": 3,
+      "best_loss": 0.05124921899628365,
+      "num_near_exact_pairs": 3,
+      "num_defective_pairs": 3,
+      "max_unitarity_residual": 3.5688564995425325e-15,
+      "run_dir": "results_d6_amub_precision_campaign/d6_n4_complex128_seed3",
+      "pairwise_overlaps_path": "results_d6_amub_precision_campaign/d6_n4_complex128_seed3/pairwise_overlaps.npz",
+      "pairwise_diagnostics_path": "results_d6_amub_precision_campaign/d6_n4_complex128_seed3/pairwise_diagnostics.json",
+      "metadata_path": "results_d6_amub_precision_campaign/d6_n4_complex128_seed3/run_metadata.json"
+    },
+    "figure": {
+      "png": "results_d6_amub_precision_campaign/heatmap_figures_representative_runs/n4_hub_and_triangle_d6_n4_seed3.png",
+      "pdf": "results_d6_amub_precision_campaign/heatmap_figures_representative_runs/n4_hub_and_triangle_d6_n4_seed3.pdf",
+      "num_pairs": 6
+    }
+  },
+  "n5_best_fully_defective": {
+    "representative": {
+      "d": 6,
+      "n_bases": 5,
+      "dtype": "complex128",
+      "seed": 0,
+      "best_loss": 0.3596367784679414,
+      "num_near_exact_pairs": 0,
+      "num_defective_pairs": 10,
+      "max_unitarity_residual": 5.1788878702859025e-15,
+      "run_dir": "results_d6_amub_precision_campaign/d6_n5_complex128_seed0",
+      "pairwise_overlaps_path": "results_d6_amub_precision_campaign/d6_n5_complex128_seed0/pairwise_overlaps.npz",
+      "pairwise_diagnostics_path": "results_d6_amub_precision_campaign/d6_n5_complex128_seed0/pairwise_diagnostics.json",
+      "metadata_path": "results_d6_amub_precision_campaign/d6_n5_complex128_seed0/run_metadata.json"
+    },
+    "figure": {
+      "png": "results_d6_amub_precision_campaign/heatmap_figures_representative_runs/n5_best_fully_defective_d6_n5_seed0.png",
+      "pdf": "results_d6_amub_precision_campaign/heatmap_figures_representative_runs/n5_best_fully_defective_d6_n5_seed0.pdf",
+      "num_pairs": 10
+    }
+  },
+  "n6_best_low_loss": {
+    "representative": {
+      "d": 6,
+      "n_bases": 6,
+      "dtype": "complex128",
+      "seed": 4,
+      "best_loss": 0.8685321046831181,
+      "num_near_exact_pairs": 0,
+      "num_defective_pairs": 15,
+      "max_unitarity_residual": 4.537579036875907e-15,
+      "run_dir": "results_d6_amub_precision_campaign/d6_n6_complex128_seed4",
+      "pairwise_overlaps_path": "results_d6_amub_precision_campaign/d6_n6_complex128_seed4/pairwise_overlaps.npz",
+      "pairwise_diagnostics_path": "results_d6_amub_precision_campaign/d6_n6_complex128_seed4/pairwise_diagnostics.json",
+      "metadata_path": "results_d6_amub_precision_campaign/d6_n6_complex128_seed4/run_metadata.json"
+    },
+    "figure": {
+      "png": "results_d6_amub_precision_campaign/heatmap_figures_representative_runs/n6_best_low_loss_d6_n6_seed4.png",
+      "pdf": "results_d6_amub_precision_campaign/heatmap_figures_representative_runs/n6_best_low_loss_d6_n6_seed4.pdf",
+      "num_pairs": 15
+    }
+  },
+  "n6_recurrent_0965933": {
+    "representative": {
+      "d": 6,
+      "n_bases": 6,
+      "dtype": "complex128",
+      "seed": 3,
+      "best_loss": 0.9659325022155348,
+      "num_near_exact_pairs": 0,
+      "num_defective_pairs": 15,
+      "max_unitarity_residual": 4.311773149352276e-15,
+      "run_dir": "results_d6_amub_precision_campaign/d6_n6_complex128_seed3",
+      "pairwise_overlaps_path": "results_d6_amub_precision_campaign/d6_n6_complex128_seed3/pairwise_overlaps.npz",
+      "pairwise_diagnostics_path": "results_d6_amub_precision_campaign/d6_n6_complex128_seed3/pairwise_diagnostics.json",
+      "metadata_path": "results_d6_amub_precision_campaign/d6_n6_complex128_seed3/run_metadata.json"
+    },
+    "figure": {
+      "png": "results_d6_amub_precision_campaign/heatmap_figures_representative_runs/n6_recurrent_0965933_d6_n6_seed3.png",
+      "pdf": "results_d6_amub_precision_campaign/heatmap_figures_representative_runs/n6_recurrent_0965933_d6_n6_seed3.pdf",
+      "num_pairs": 15
+    }
+  }
+}

@@ -1,0 +1,11 @@
+dimensions: [6, 12, 24, 48, 96]
+n_bases: 6
+steps: 1000
+dtypes: [complex128, complex64]
+backends:
+  cpu:
+    matrix_exp_backend: torch_native
+  mps:
+    matrix_exp_backend: taylor
+    taylor_order: 20
+output_root: results/benchmarks

@@ -1,0 +1,72 @@
+{
+  "n3_exact_or_near_exact": {
+    "d": 6,
+    "n_bases": 3,
+    "dtype": "complex64",
+    "seed": 1,
+    "best_loss": 3.5638159090467525e-13,
+    "num_near_exact_pairs": 3,
+    "num_defective_pairs": 0,
+    "max_unitarity_residual": 9.112438306146942e-07,
+    "run_dir": "results_d6_amub_precision_campaign/d6_n3_complex64_seed1",
+    "pairwise_overlaps_path": "results_d6_amub_precision_campaign/d6_n3_complex64_seed1/pairwise_overlaps.npz",
+    "pairwise_diagnostics_path": "results_d6_amub_precision_campaign/d6_n3_complex64_seed1/pairwise_diagnostics.json",
+    "metadata_path": "results_d6_amub_precision_campaign/d6_n3_complex64_seed1/run_metadata.json"
+  },
+  "n3_defective_triangle": {
+    "d": 6,
+    "n_bases": 3,
+    "dtype": "complex64",
+    "seed": 3,
+    "best_loss": 0.05124921351671219,
+    "num_near_exact_pairs": 0,
+    "num_defective_pairs": 3,
+    "max_unitarity_residual": 1.1772801826737123e-06,
+    "run_dir": "results_d6_amub_precision_campaign/d6_n3_complex64_seed3",
+    "pairwise_overlaps_path": "results_d6_amub_precision_campaign/d6_n3_complex64_seed3/pairwise_overlaps.npz",
+    "pairwise_diagnostics_path": "results_d6_amub_precision_campaign/d6_n3_complex64_seed3/pairwise_diagnostics.json",
+    "metadata_path": "results_d6_amub_precision_campaign/d6_n3_complex64_seed3/run_metadata.json"
+  },
+  "n4_hub_and_triangle": {
+    "d": 6,
+    "n_bases": 4,
+    "dtype": "complex64",
+    "seed": 3,
+    "best_loss": 0.05124921351671219,
+    "num_near_exact_pairs": 3,
+    "num_defective_pairs": 3,
+    "max_unitarity_residual": 1.3988175169288297e-06,
+    "run_dir": "results_d6_amub_precision_campaign/d6_n4_complex64_seed3",
+    "pairwise_overlaps_path": "results_d6_amub_precision_campaign/d6_n4_complex64_seed3/pairwise_overlaps.npz",
+    "pairwise_diagnostics_path": "results_d6_amub_precision_campaign/d6_n4_complex64_seed3/pairwise_diagnostics.json",
+    "metadata_path": "results_d6_amub_precision_campaign/d6_n4_complex64_seed3/run_metadata.json"
+  },
+  "n5_best_fully_defective": {
+    "d": 6,
+    "n_bases": 5,
+    "dtype": "complex64",
+    "seed": 3,
+    "best_loss": 0.35963666439056396,
+    "num_near_exact_pairs": 0,
+    "num_defective_pairs": 10,
+    "max_unitarity_residual": 1.0711686400100007e-06,
+    "run_dir": "results_d6_amub_precision_campaign/d6_n5_complex64_seed3",
+    "pairwise_overlaps_path": "results_d6_amub_precision_campaign/d6_n5_complex64_seed3/pairwise_overlaps.npz",
+    "pairwise_diagnostics_path": "results_d6_amub_precision_campaign/d6_n5_complex64_seed3/pairwise_diagnostics.json",
+    "metadata_path": "results_d6_amub_precision_campaign/d6_n5_complex64_seed3/run_metadata.json"
+  },
+  "n6_best_low_loss": {
+    "d": 6,
+    "n_bases": 6,
+    "dtype": "complex64",
+    "seed": 4,
+    "best_loss": 0.8685318827629089,
+    "num_near_exact_pairs": 0,
+    "num_defective_pairs": 15,
+    "max_unitarity_residual": 1.3188927141527529e-06,
+    "run_dir": "results_d6_amub_precision_campaign/d6_n6_complex64_seed4",
+    "pairwise_overlaps_path": "results_d6_amub_precision_campaign/d6_n6_complex64_seed4/pairwise_overlaps.npz",
+    "pairwise_diagnostics_path": "results_d6_amub_precision_campaign/d6_n6_complex64_seed4/pairwise_diagnostics.json",
+    "metadata_path": "results_d6_amub_precision_campaign/d6_n6_complex64_seed4/run_metadata.json"
+  }
+}
