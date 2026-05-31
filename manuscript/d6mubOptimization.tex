@@ -425,6 +425,8 @@ For each run, the workflow writes a self-contained artifact directory. The direc
     \item \texttt{best\_bases.npy}, storing the optimized basis matrices;
     \item \texttt{pairwise\_overlaps.npz}, storing all matrices $|U_i^\dagger U_j|^2$;
     \item \texttt{pairwise\_diagnostics.json}, storing pairwise losses, maximum deviations, and overlap statistics;
+    \item \texttt{unitarity\_residuals.json}, storing the residuals $\|U_i^\dagger U_i - I\|_2$ to verify numerical orthonormality;
+    \item \texttt{generator\_norms.json}, storing norms of the Lie-algebra generator parameters;
     \item \texttt{optimization\_history.csv}, storing the loss trace recorded during optimization;
     \item \texttt{run\_metadata.json}, storing problem parameters, optimizer settings, dtype, backend policy, and diagnostic summaries.
 \end{itemize}
