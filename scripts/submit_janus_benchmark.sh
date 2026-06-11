@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=amub-benchmark
-#SBATCH --partition=gpu
+#SBATCH --partition=defq
 #SBATCH --gres=gpu:1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
