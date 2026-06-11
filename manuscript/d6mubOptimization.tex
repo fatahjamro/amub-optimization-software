@@ -733,6 +733,25 @@ At $d=96$, the MPS Taylor backend completes $1000$ iterations in $48.384$ second
 
 These results indicate that the Taylor-series layer enables portable accelerator execution and can become favorable at larger dimensions, while preserving a CPU-native reference pathway for the structural AMUB experiments reported above.
 
+To evaluate the scalability of the approach on enterprise-grade hardware, we additionally performed benchmark experiments on the JANUS high-performance computing cluster, which features AMD EPYC 7352 CPUs and NVIDIA A100 GPUs. As shown in Table~\ref{tab:hardware-benchmarks-janus}, the CPU baseline times grow significantly with dimension, while the NVIDIA A100 GPU maintains a nearly constant timing of approximately $26$--$28$ seconds across all dimensions up to $d=96$. The hardware crossover occurs earlier on the JANUS cluster, overtaking the double-precision CPU baseline between $d=24$ and $d=48$, and overtaking the single-precision CPU baseline at $d=96$. This confirms that the Taylor-series matrix exponential fallback delivers substantial acceleration for moderate-to-large tensor dimensions on high-performance accelerators.
+
+\begin{table*}[t]
+  \caption{Multi-dimensional hardware benchmark and iteration speed comparison (in seconds) per $1000$ optimization steps ($n=6$ bases) across dimensions $d=6, 12, 24, 48, 96$ on the JANUS HPC cluster (AMD EPYC 7352 CPU vs. NVIDIA A100 GPU). Order-$20$ Taylor expansion is utilized for the GPU backend.}
+  \label{tab:hardware-benchmarks-janus}
+  \begin{tabular}{ccccc}
+    \toprule
+    Dimension $d$ & CPU \texttt{c128} (s) & CPU \texttt{c64} (s) & A100 GPU (s) & Relative GPU Speed \\
+    \midrule
+    6  & 7.270 & 7.649 & 26.495 & $0.27\times$ \\
+    12 & 10.314 & 10.870 & 27.317 & $0.38\times$ \\
+    24 & 22.282 & 15.492 & 27.453 & $0.81\times$ \\
+    48 & 31.449 & 22.983 & 27.578 & $1.14\times$ \\
+    96 & 72.810 & 55.595 & 27.705 & $2.63\times$ \\
+    \bottomrule
+  \end{tabular}
+\end{table*}
+\noindent Relative GPU speed is computed as CPU complex128 time divided by GPU complex128 time.
+
 
 \graphicspath{{figures/}}
 
