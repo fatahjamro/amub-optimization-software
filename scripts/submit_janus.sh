@@ -33,9 +33,12 @@ fi
 echo "Activating virtualenv..."
 source venv/bin/activate || echo "Failed to activate venv, using system python."
 
-# 3. Run the Multi-Seed Campaign
-echo "Executing campaign runner..."
+# 3. Run the Multi-Seed Campaigns
+echo "Executing complex128 campaign runner..."
 python3 scripts/run_multiseed_campaign.py --config configs/multiseed_janus_100.yaml
+
+echo "Executing complex64 campaign runner..."
+python3 scripts/run_multiseed_campaign.py --config configs/multiseed_janus_64.yaml
 
 # 4. Compile and Summarize Results
 echo "Summarizing results..."
