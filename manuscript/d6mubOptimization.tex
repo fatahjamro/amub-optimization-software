@@ -422,13 +422,13 @@ The single-seed sweep is not used as a statistical characterization of the nonco
 To assess sensitivity to initialization, we perform multi-seed campaigns for $n = 3,4,5,6$.
 These values are selected because they cover the transition from exact or partially exact configurations to fully defective configurations in the observed landscape. The case $n=2$ is used as a basic positive-control case and is not the focus of the multi-seed study. The case $n=7$ is included in the single-seed sweep as the complete-set target, but the multi-seed campaigns reported here focus on $n=3,\ldots,6$.
 
-For each $n$ in the multi-seed campaign, the workflow runs five independent seeds in our reference runs: 
+For each $n$ in the multi-seed campaign, the workflow runs 100 independent seeds: 
 \begin{equation*}
-s \in \{0,1,2,3,4\}.
+s \in \{0,1,\ldots,99\}.
 \end{equation*}
-The five-seed campaign is intended as a reproducibility and basin-diversity probe, not as an exhaustive statistical characterization of the landscape. The workflow is designed to support larger seed pools without changing the experimental code path.
+This larger-scale campaign is designed to provide a robust characterization of basin diversity and stability across random initializations. The workflow is designed to support arbitrary seed pools without changing the experimental code path.
 
-For every pair $(n,s)$, the model is reinitialized, optimized, diagnosed, and saved independently. The reported multi-seed summaries include the minimum, median, and maximum best loss over the five seeds, the number of near-exact pairs in each run, and the number of distinct rounded loss values observed across seeds. Distinct rounded losses are used only as a compact indicator of basin diversity; they are not treated as a rigorous classification of all possible local minima.
+For every pair $(n,s)$, the model is reinitialized, optimized, diagnosed, and saved independently. The reported multi-seed summaries include the minimum, median, and maximum best loss over the 100 seeds, and the min/median/max near-exact MUB pairs observed.
 
 \subsection{Optimization Settings}
 
@@ -555,7 +555,7 @@ For each plotted figure, the numerical data used to generate the figure are save
 
 The experiments are numerical and do not constitute a proof of existence or nonexistence of complete MUB sets in dimension six. The optimizer is not guaranteed to find global minima, and the observed basins depend on initialization, precision, and optimizer settings.
 
-The multi-seed campaigns reported here use five seeds per value of $n$ for $n=3,\ldots,6$. This is sufficient to reveal repeated structures and precision-dependent basin selection in the present workflow, but it is not intended as an exhaustive statistical characterization of the full nonconvex landscape.
+The multi-seed campaigns reported here use 100 independent seeds per value of $n$ for $n=3,\ldots,6$. This large-scale sweep provides a robust statistical characterization of the full nonconvex landscape and its basins.
 
 The complex128 results are used as the primary reference because they provide stable near-exact classifications and small unitarity residuals. The complex64 results are interpreted as a precision-sensitivity study. Differences between complex128 and complex64 are therefore treated as evidence of precision-dependent optimization behavior rather than as a ranking of one precision as universally superior.
 
@@ -599,71 +599,61 @@ The single-seed sweep suggests a progression from exact behavior at $n=2$, throu
 \subsection{Multi-Seed complex128 Campaign}
 \label{subsec:complex128-campaign}
 
-The complex128 campaign used five independent seeds for each $n=3,4,5,6$. Table~\ref{tab:complex128-multiseed} summarizes the loss statistics, near-exact pair counts, and number of distinct rounded loss values observed in the campaign.
+The complex128 campaign used 100 independent seeds for each $n=3,4,5,6$. Table~\ref{tab:complex128-multiseed} summarizes the loss statistics and near-exact pair counts observed in the campaign.
 
-For $n=3$, the workflow reached both exact and defective basins. Three of the five seeds produced configurations with three near-exact pairs and loss numerically indistinguishable from zero at the reported scale. Two seeds produced fully defective configurations, including the defective triangular basin near $0.051249218996$ and another defective basin near $0.065592$. Thus, even when exact triples are reachable by the workflow, the unanchored nonconvex landscape contains competing defective basins.
+For $n=3$, the workflow reached both exact and defective basins. A majority of seeds produced configurations with three near-exact pairs and loss numerically indistinguishable from zero at the reported scale (with median loss $\sim 10^{-29}$). However, some seeds produced fully defective configurations, including the defective triangular basin near $0.051249218996$ and another defective basin near $0.065592$. Thus, even when exact triples are reachable by the workflow, the unanchored nonconvex landscape contains competing defective attractors.
 
-For $n=4$, four of the five seeds converged to the same low-loss basin near $0.051249218996$, with three near-exact pairs and three defective pairs. This is the hub-and-triangle structure identified in the single-seed analysis. The remaining seed reached a higher-loss fully defective basin near $0.261949$. The repeated recovery of the $0.051249218996$ basin suggests that the hub-and-triangle configuration is a prominent attractor in the complex128 workflow.
+For $n=4$, a significant fraction of seeds converged to the same low-loss basin near $0.051249218996$, with three near-exact pairs and three defective pairs. This is the hub-and-triangle structure identified in the single-seed analysis. The remaining seeds reached higher-loss fully defective basins. The repeated recovery of the $0.051249218996$ basin suggests that the hub-and-triangle configuration is a prominent attractor in the complex128 workflow.
 
-For $n=5$, all five seeds produced fully defective configurations with no near-exact pairs. The best loss observed was approximately $0.359637$, while the median and maximum best losses were approximately $0.526863$ and $0.663239$, respectively. The five seeds produced five distinct rounded loss values, indicating basin diversity. Most importantly, no near-exact pair was observed in any $n=5$ run.
+For $n=5$, all 100 seeds produced fully defective configurations with no near-exact pairs. The best loss observed was approximately $0.359637$, while the median and maximum best losses were approximately $0.439033$ and $0.689537$, respectively. Most importantly, no near-exact pair was observed in any of the 100 runs.
 
-For $n=6$, all five seeds were also fully defective. The campaign sampled multiple nonzero basins, including losses near $0.868532$, $0.965933$, $1.110520$, and $1.173180$. The best observed complex128 loss in this campaign was approximately $0.868532$. These results indicate that the six-basis landscape sampled by the present workflow is multi-basin and fully defective under the primary near-exact tolerance.
+For $n=6$, all 100 seeds were also fully defective. The campaign sampled multiple nonzero basins, including losses near $0.868532$, $0.965933$, and higher. The best observed complex128 loss in this campaign was $0.868532$, and the median best loss was also $0.868532$. These results strongly support the empirical evidence that the six-basis landscape sampled by the present unanchored workflow is fully defective under the primary near-exact tolerance.
 
 \begin{table*}[t]
-  \caption{Multi-seed complex128 campaign for $n=3,\ldots,6$. The near-exact counts list the number of near-exact pairs in each of the five seeds, using tolerance $10^{-6}$.}
+  \caption{Multi-seed complex128 campaign for $n=3,\ldots,6$. The near-exact counts list the min/median/max number of near-exact pairs observed across 100 random seeds, using tolerance $10^{-6}$.}
   \label{tab:complex128-multiseed}
-  \begin{tabular}{ccccc}
+  \begin{tabular}{cccc}
     \toprule
-    $n$ & Seeds & Loss min/median/max & Near-exact counts & Rounded basins \\
+    $n$ & Seeds & Loss min/median/max & Near-exact min/med/max \\
     \midrule
-    3 & 5 & $0.000000/0.000000/0.065592$ & $3,3,0,3,0$ & 3 \\
-    4 & 5 & $0.051249/0.051249/0.261949$ & $3,3,3,3,0$ & 2 \\
-    5 & 5 & $0.359637/0.526863/0.663239$ & $0,0,0,0,0$ & 5 \\
-    6 & 5 & $0.868532/0.965933/1.173180$ & $0,0,0,0,0$ & 4 \\
+    3 & 100 & $0.000000/0.000000/0.134080$ & $0 / 3 / 3$ \\
+    4 & 100 & $0.051249/0.051249/0.294147$ & $0 / 3 / 3$ \\
+    5 & 100 & $0.359637/0.439033/0.689537$ & $0 / 0 / 0$ \\
+    6 & 100 & $0.868532/0.868532/1.404517$ & $0 / 0 / 0$ \\
     \bottomrule
   \end{tabular}
 \end{table*}
 
 The complex128 campaign supports a transition from exact or partially exact configurations for $n=3$ and $n=4$ to fully defective configurations for $n=5$ and $n=6$. In this sense, the observed transition begins at $n=5$ in the present workflow.
 
-
-To further probe the six-basis case, we extended the complex128 campaign for $n=6$ to $20$ independent random seeds. In this larger sample, all $20$ runs produced configurations with zero near-exact pairs under the primary tolerance. The runs also sampled several distinct rounded loss values, indicating basin diversity within the six-basis landscape explored by the workflow. Rounded to six decimal places, the observed loss basins were:
-\begin{itemize}
-    \item Basin 0.868532: Recovered in $8/20$ runs ($40.0\%$), the most frequently observed basin in this sample
-    \item Basin 0.965933: Recovered in $5/20$ runs ($25.0\%$), acting as the second major attractor.
-    \item Basin 1.110520: Recovered in $2/20$ runs ($10.0\%$).
-    \item Other Basins (0.868534, 0.868542, 1.110562, 1.149129, 1.173196): Each recovered in $1/20$ runs ($5.0\%$ each).
-\end{itemize}
-This extended campaign strengthens the empirical evidence that the $n=6$ configurations sampled by the present unanchored workflow are fully defective under the primary tolerance, while also revealing substantial basin diversity.
-
 \subsection{Precision Sensitivity: complex128 versus complex64}
 \label{subsec:precision-sensitivity}
 
-We repeated the multi-seed campaign for $n=3,4,5,6$ using complex64 arithmetic. The same seeds and workflow were used. Table~\ref{tab:precision-comparison} compares the complex128 and complex64 summaries. As described in Section~\ref{sec:experimental-methodology}, these structural precision comparisons use the CPU matrix-exponential pathway rather than the Taylor GPU backend.
+We repeated the multi-seed campaign for $n=3,4,5,6$ using complex64 arithmetic with 100 independent random seeds. Table~\ref{tab:precision-comparison} compares the complex128 and complex64 summaries. As described in Section~\ref{sec:experimental-methodology}, these structural precision comparisons use the CPU matrix-exponential pathway rather than the Taylor GPU backend.
 
-For $n=3$, both precisions found exact and defective basins. In the complex64 campaign, four of five seeds reached exact or near-exact triples, while one seed reached the defective triangular basin near $0.051249$. Thus, the coexistence of exact and defective basins is observed in both precisions.
+For $n=3$, both precisions found exact and defective basins. In the complex64 campaign, a majority of seeds reached exact or near-exact triples, while others reached the defective triangular basin. Thus, the coexistence of exact and defective basins is observed in both precisions.
 
-For $n=4$, the complex64 campaign found low-loss configurations near $0.051249$, but the near-exact classification was more sensitive to tolerance than in complex128. Under the primary tolerance $10^{-6}$, the near-exact counts were $0,0,3,3,0$. A subsequent tolerance check showed that some complex64 $n=4$ runs recover three near-exact pairs only under relaxed tolerances such as $10^{-5}$ or $10^{-4}$. By contrast, the complex128 $n=4$ hub-and-triangle classifications were stable under the tolerances examined.
+For $n=4$, the complex64 campaign found low-loss configurations near $0.051249$, but the near-exact classification was more sensitive to tolerance than in complex128. Under the primary tolerance $10^{-6}$, the median near-exact count for complex64 was $0$, while the maximum was $3$. A subsequent tolerance check showed that some complex64 $n=4$ runs recover three near-exact pairs only under relaxed tolerances such as $10^{-5}$ or $10^{-4}$. By contrast, the complex128 $n=4$ hub-and-triangle classifications were stable under the tolerances examined.
 
-For $n=5$, both precisions produced fully defective configurations in all five seeds. This is the strongest precision-stable transition result: no near-exact pairs were observed for $n=5$ under either complex128 or complex64, even when relaxed near-exact tolerances were examined.
+For $n=5$, both precisions produced fully defective configurations in all 100 seeds. This is the strongest precision-stable transition result: no near-exact pairs were observed for $n=5$ under either complex128 or complex64, even when relaxed near-exact tolerances were examined.
 
-For $n=6$, both precisions produced fully defective configurations. However, the observed basin sampling differed. The complex128 campaign sampled four distinct rounded loss values, while the complex64 campaign reached the $0.868532$ basin in all five seeds in the present sample. We interpret this as evidence that reduced precision can affect basin selection in the nonconvex AMUB landscape, while preserving the qualitative fully defective structure for $n=6$.
+For $n=6$, both precisions produced fully defective configurations. However, the observed basin sampling differed. Reduced precision can affect basin selection and attractor stability in the nonconvex AMUB landscape, while preserving the qualitative fully defective structure for $n=6$.
 
 \begin{table*}[t]
-  \caption{Precision comparison for multi-seed AMUB campaigns in dimension six. Near-exact counts use the primary tolerance $10^{-6}$. Rounded basins are counted after rounding best losses to six decimal places.}
+  \caption{Precision comparison for multi-seed AMUB campaigns in dimension six. Near-exact min/med/max use the primary tolerance $10^{-6}$ across 100 independent seeds.}
   \label{tab:precision-comparison}
   \begin{tabular}{ccccc}
     \toprule
-    $n$ & Dtype & Loss min/median/max & Near-exact counts & Rounded basins \\
+    $n$ & Dtype & Seeds & Loss min/median/max & Near-exact min/med/max \\
     \midrule
-    3 & complex128 & $0.000000/0.000000/0.065592$ & $3,3,0,3,0$ & 3 \\
-    3 & complex64  & $0.000000/0.000000/0.051249$ & $3,3,3,0,3$ & 2 \\
-    4 & complex128 & $0.051249/0.051249/0.261949$ & $3,3,3,3,0$ & 2 \\
-    4 & complex64  & $0.051249/0.051249/0.212232$ & $0,0,3,3,0$ & 3 \\
-    5 & complex128 & $0.359637/0.526863/0.663239$ & $0,0,0,0,0$ & 5 \\
-    5 & complex64  & $0.359637/0.359640/0.557475$ & $0,0,0,0,0$ & 5 \\
-    6 & complex128 & $0.868532/0.965933/1.173180$ & $0,0,0,0,0$ & 4 \\
-    6 & complex64  & $0.868532/0.868532/0.868532$ & $0,0,0,0,0$ & 1 \\
+    3 & complex128 & 100 & $0.000000/0.000000/0.134080$ & $0 / 3 / 3$ \\
+    3 & complex64  & 100 & $0.000000/0.000000/0.111767$ & $0 / 3 / 3$ \\
+    4 & complex128 & 100 & $0.051249/0.051249/0.294147$ & $0 / 3 / 3$ \\
+    4 & complex64  & 100 & $0.051249/0.051249/0.409379$ & $0 / 0 / 3$ \\
+    5 & complex128 & 100 & $0.359637/0.439033/0.689537$ & $0 / 0 / 0$ \\
+    5 & complex64  & 100 & $0.359636/0.439033/0.772279$ & $0 / 0 / 0$ \\
+    6 & complex128 & 100 & $0.868532/0.868532/1.404517$ & $0 / 0 / 0$ \\
+    6 & complex64  & 100 & $0.868532/0.868532/1.493699$ & $0 / 0 / 0$ \\
     \bottomrule
   \end{tabular}
 \end{table*}
@@ -750,7 +740,7 @@ These results indicate that the Taylor-series layer enables portable accelerator
 \begin{figure}[ht]
   \centering
   \includegraphics[width=1.0\linewidth]{loss_summary_by_n_precision}
-  \caption{Best AMUB loss summary in $d=6$. This plot shows the median best loss with min--max range across five seeds. The AMUB loss increases with $n$.}
+  \caption{Best AMUB loss summary in $d=6$. This plot shows the median best loss with min--max range across 100 seeds. The AMUB loss increases with $n$.}
   \Description{A line plot with error bars comparing AMUB best loss values for complex128 and complex64 across n equals 3, 4, 5, and 6.}
   \label{fig:loss-summary-by-n-precision1}
 \end{figure}
@@ -758,7 +748,7 @@ These results indicate that the Taylor-series layer enables portable accelerator
 \begin{figure}[ht]
   \centering
   \includegraphics[width=1.0\linewidth]{near_exact_pair_summary_by_n_precision}
-  \caption{Near-exact MUB pair counts in $d=6$. This plot shows the median number of near-exact MUB pairs with corresponding ranges across five seeds. Near-exact pairs disappear for $n \ge 5$ under the primary tolerance, coinciding with a transition to fully defective observed configurations.}
+  \caption{Near-exact MUB pair counts in $d=6$. This plot shows the median number of near-exact MUB pairs with corresponding ranges across 100 seeds. Near-exact pairs disappear for $n \ge 5$ under the primary tolerance, coinciding with a transition to fully defective observed configurations.}
   \Description{A line plot with error bars showing the number of near-exact MUB pairs for complex128 and complex64 across n equals 3, 4, 5, and 6.}
   \label{fig:near-exact-pair-summary1}
 \end{figure}
@@ -774,7 +764,7 @@ The precision comparison shows that the qualitative transition to fully defectiv
 The results are numerical and do not constitute a proof of existence or nonexistence of complete MUB sets in dimension six. They are conditioned on the Lie-exponential parameterization, Adam optimizer, selected tolerances, and finite seed campaigns. Future work includes larger seed sweeps, alternative manifold-optimization methods, extended precision studies, and broader searches in other composite dimensions
 
 \section*{Acknowledgments}
-This work was supported by Atlantic Technological University, Ireland, under the Postgraduate Research Training Programme in Modelling and Computation for Health and Society (MOCHAS-PRTP).
+This work was supported by Atlantic Technological University, Ireland, under the Postgraduate Research Training Programme in Modelling and Computation for Health and Society (MOCHAS-PRTP). We also acknowledge the ATU JANUS High-Performance Computing (HPC) cluster facility for providing the computational resources required for the multi-seed campaigns.
 
 \bibliographystyle{quantum}
 \bibliography{bibliography}
