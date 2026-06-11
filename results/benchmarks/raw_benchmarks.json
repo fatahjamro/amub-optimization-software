@@ -3,105 +3,140 @@
     "dimension": 6,
     "dtype": "complex128",
     "backend": "cpu",
-    "elapsed_seconds": 2.2124779999721795,
+    "elapsed_seconds": 7.269877919927239,
+    "steps": 1000
+  },
+  {
+    "dimension": 6,
+    "dtype": "complex128",
+    "backend": "cuda",
+    "elapsed_seconds": 26.49480956699699,
     "steps": 1000
   },
   {
     "dimension": 6,
     "dtype": "complex64",
     "backend": "cpu",
-    "elapsed_seconds": 2.194791957968846,
+    "elapsed_seconds": 7.648988425033167,
     "steps": 1000
   },
   {
     "dimension": 6,
     "dtype": "complex64",
-    "backend": "mps",
-    "elapsed_seconds": 45.63978545810096,
+    "backend": "cuda",
+    "elapsed_seconds": 26.503630303079262,
     "steps": 1000
   },
   {
     "dimension": 12,
     "dtype": "complex128",
     "backend": "cpu",
-    "elapsed_seconds": 2.7386389169842005,
+    "elapsed_seconds": 10.314040117897093,
+    "steps": 1000
+  },
+  {
+    "dimension": 12,
+    "dtype": "complex128",
+    "backend": "cuda",
+    "elapsed_seconds": 27.316748150158674,
     "steps": 1000
   },
   {
     "dimension": 12,
     "dtype": "complex64",
     "backend": "cpu",
-    "elapsed_seconds": 2.5066134580411017,
+    "elapsed_seconds": 10.870129862101749,
     "steps": 1000
   },
   {
     "dimension": 12,
     "dtype": "complex64",
-    "backend": "mps",
-    "elapsed_seconds": 47.412106666946784,
+    "backend": "cuda",
+    "elapsed_seconds": 26.522113983985037,
     "steps": 1000
   },
   {
     "dimension": 24,
     "dtype": "complex128",
     "backend": "cpu",
-    "elapsed_seconds": 4.131619791965932,
+    "elapsed_seconds": 22.28216110705398,
+    "steps": 1000
+  },
+  {
+    "dimension": 24,
+    "dtype": "complex128",
+    "backend": "cuda",
+    "elapsed_seconds": 27.452553816139698,
     "steps": 1000
   },
   {
     "dimension": 24,
     "dtype": "complex64",
     "backend": "cpu",
-    "elapsed_seconds": 3.624629416037351,
+    "elapsed_seconds": 15.492491003824398,
     "steps": 1000
   },
   {
     "dimension": 24,
     "dtype": "complex64",
-    "backend": "mps",
-    "elapsed_seconds": 48.38297195802443,
+    "backend": "cuda",
+    "elapsed_seconds": 27.01542061707005,
     "steps": 1000
   },
   {
     "dimension": 48,
     "dtype": "complex128",
     "backend": "cpu",
-    "elapsed_seconds": 12.409588291775435,
+    "elapsed_seconds": 31.4489729849156,
+    "steps": 1000
+  },
+  {
+    "dimension": 48,
+    "dtype": "complex128",
+    "backend": "cuda",
+    "elapsed_seconds": 27.577506332891062,
     "steps": 1000
   },
   {
     "dimension": 48,
     "dtype": "complex64",
     "backend": "cpu",
-    "elapsed_seconds": 9.923796707997099,
+    "elapsed_seconds": 22.982902019983158,
     "steps": 1000
   },
   {
     "dimension": 48,
     "dtype": "complex64",
-    "backend": "mps",
-    "elapsed_seconds": 47.901736167026684,
+    "backend": "cuda",
+    "elapsed_seconds": 27.066423809854314,
     "steps": 1000
   },
   {
     "dimension": 96,
     "dtype": "complex128",
     "backend": "cpu",
-    "elapsed_seconds": 69.27099141711369,
+    "elapsed_seconds": 72.80966815701686,
+    "steps": 1000
+  },
+  {
+    "dimension": 96,
+    "dtype": "complex128",
+    "backend": "cuda",
+    "elapsed_seconds": 27.705310197081417,
     "steps": 1000
   },
   {
     "dimension": 96,
     "dtype": "complex64",
     "backend": "cpu",
-    "elapsed_seconds": 42.409758375026286,
+    "elapsed_seconds": 55.594866293948144,
     "steps": 1000
   },
   {
     "dimension": 96,
     "dtype": "complex64",
-    "backend": "mps",
-    "elapsed_seconds": 49.44163337512873,
+    "backend": "cuda",
+    "elapsed_seconds": 27.05412635509856,
     "steps": 1000
   }
 ]
