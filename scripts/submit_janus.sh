@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=amub-janus
-#SBATCH --partition=compute        # Use the standard compute partition (change to 'gpu' if running GPU backend)
+#SBATCH --partition=defq        # Use the standard compute partition (change to 'gpu' if running GPU backend)
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=4          # Allocate 4 CPU cores
