@@ -32,7 +32,7 @@
 \maketitle
 
 \begin{abstract}
-The existence of a complete set of seven mutually unbiased bases in dimension six remains an open problem. A reproducible, precision-aware mathematical software workflow is presented to optimize unanchored approximate configurations using automatic differentiation. Candidate bases are parameterized using Lie-algebra exponentiation. A custom Taylor-series matrix exponentiation layer enables hardware acceleration on graphics processing units. Multi-seed experiments in dimension six reveal a structured transition as the number of bases increases. For three and four bases, the workflow recovers exact or partially exact configurations. For five or more bases, all optimized configurations are globally defective and frustrated. Double-precision arithmetic resolves multiple local minima in the six-basis landscape. In the present sample, single-precision execution tends to select a single low-loss basin. Multi-dimensional benchmarks show a clear execution speed crossover around dimension ninety. At this scale, parallelized graphics processing unit acceleration natively outpaces central processing unit caches.These findings provide reproducible numerical evidence, within the explored optimization workflow, of a transition to fully defective configurations beginning at five bases in dimension six. The generalized, highly portable workflow establishes a scalable framework for high-dimensional quantum combinatorial design searches.
+The search for mutually unbiased bases (MUBs) in composite dimensions remains a notorious challenge in quantum information theory, particularly in dimension six. We present a generalized, parameter-driven mathematical software workflow designed to optimize unanchored approximate MUB configurations across arbitrary dimensions $d$, candidate base counts $n$, and multi-seed sweeps. The underlying optimizer parameterizes unitary bases via Lie-algebra exponentiation, supported by a custom, hardware-accelerated complex Taylor-series layer for GPU compatibility. As a rigorous proof-of-work, we apply this software to study the optimization landscape in dimension six for varying numbers of candidate bases ($n=3$ to $6$). The experiments reveal a structured transition: the workflow recovers exact configurations for $n=3$ and $n=4$, while configurations for $n \ge 5$ become globally defective. Double-precision arithmetic resolves multiple local minima in the landscape, whereas single-precision is susceptible to basin selection effects. Performance scaling benchmarks demonstrate a hardware-acceleration crossover around dimension ninety. These results demonstrate the utility of our generalized, reproducible workflow as a scalable framework for high-dimensional quantum combinatorial searches.
 \end{abstract}
 
 \section{Introduction}
@@ -46,17 +46,17 @@ A collection of bases is mutually unbiased if every pair satisfies this conditio
 
 In dimensions that are prime or powers of primes, complete sets of $d+1$ mutually unbiased bases are known to exist~\cite{WOOTTERS1989optimalStateMUB}. In composite dimensions~\cite{McNulty2026mutuallyunbiased}, and in particular in $d=6$, the existence of a complete set of seven MUBs remains a longstanding open problem~\cite{bengtsson2007MUBDandHadamard, horodecki2022FiveOpenProblems}. While numerous analytic and computational approaches have been explored~\cite{brierley2010mutuallyunbiasedbasesdimensions}, no definitive resolution is known.
 
-This paper adopts a computational and software-focused perspective. We study approximate mutually unbiased basis (AMUB) configurations in dimension six using a reproducible numerical workflow. The focus is on understanding the structure of the underlying optimization landscape and on providing a reliable computational framework for future investigations.
+This paper adopts a software-engineering and computational physics perspective. We present a generalized, parameter-driven mathematical software workflow designed to find and study approximate mutually unbiased basis (AMUB) configurations in arbitrary dimensions. The focus is on providing a scalable, reliable computational framework for exploring high-dimensional MUB landscapes.
 
 We consider an unanchored formulation, in which all candidate bases are treated symmetrically and optimized simultaneously. This differs from anchored formulations that fix one basis in advance. Each candidate basis is parameterized as a unitary matrix using Lie-algebra exponentiation~\cite{elena2000ApproxLieAlgerba}, ensuring that the unitary constraint is satisfied by construction. The optimization objective measures the total deviation from the mutually unbiased condition across all pairs of bases.
 
 The methodology is implemented in Python using PyTorch, NumPy, and marimo notebooks, with structured data export for reproducibility. The workflow explicitly records basis matrices, pairwise overlaps, diagnostics, and metadata, enabling independent regeneration and analysis of all results.
 
-The computational experiments target dimension six ($d=6$) for varying numbers of candidate bases ($n$). Multi-seed experiments are performed for $n=3,4,5,6$, allowing us to distinguish reproducible structural features from initialization-dependent effects. The experiments reveal a progression from exact or partially exact configurations at small $n$ to fully defective configurations at larger $n$. In particular, the results indicate that configurations with $n \ge 5$ candidate bases do not exhibit near-exact MUB pairs under the present workflow, while partial exactness is observed for $n=3$ and $n=4$.
+To demonstrate and validate the workflow, we target the notorious dimension six ($d=6$) case for varying numbers of candidate bases ($n$). Multi-seed campaigns are performed for $n=3,4,5,6$, allowing us to distinguish reproducible structural features from initialization-dependent effects. The experiments reveal a progression from exact configurations at small $n$ to fully defective configurations at larger $n$. In particular, the results indicate that configurations with $n \ge 5$ candidate bases do not exhibit near-exact MUB pairs under the present workflow, while exactness is recovered for $n=3$ and $n=4$.
 
 The paper also investigates the effect of numerical precision by comparing complex128 reference runs with complex64 reduced-precision runs, focusing on loss values, near-exact classifications, basin selection, and unitarity residuals. A double-precision reference implementation (\texttt{complex128}) is contrasted against a single-precision baseline (\texttt{complex64}) on both CPU and hardware-accelerated GPU backends. The results show that while the qualitative transition from partial exactness to global defect is stable across precisions, the specific error bounds, near-exact pair classifications, and optimization basin selection are highly sensitive to numerical floating-point precision.
 
-Overall, this work contributes a reproducible, precision-aware computational framework for exploring AMUB configurations, together with numerical evidence about the structure of the optimization landscape in dimension six.
+Overall, this work contributes a generalized, reproducible computational framework for exploring AMUB configurations, together with extensive case-study evidence about the structure of the optimization landscape in dimension six.
 
 \section{Contributions}
 
@@ -64,8 +64,8 @@ This paper makes the following contributions:
 
 \begin{description}
 
-\item \textbf{Reproducible computational workflow:}
-We design and implement a structured workflow for optimizing approximate mutually unbiased bases, including explicit artifact generation (basis matrices, overlap tensors, diagnostics, optimization histories, and metadata). The workflow supports independent reproduction and extension of all reported results.
+\item \textbf{Generalized, reproducible computational workflow:}
+We design and implement a fully parameterized, dimension-agnostic software workflow for optimizing approximate mutually unbiased bases in arbitrary dimensions. The workflow includes structured artifact generation (basis matrices, overlap tensors, diagnostics, optimization histories, and metadata) to support independent reproduction and expansion to higher-dimensional searches.
 
 \item \textbf{Unanchored AMUB formulation:}
 We study a fully unanchored optimization problem in which all candidate bases are optimized simultaneously without fixing a reference basis. This formulation enables symmetric exploration of the configuration space and exposes structural patterns that are not imposed by construction.
@@ -79,8 +79,8 @@ We implement a custom Taylor-series matrix exponentiation layer for complex matr
 \item \textbf{Multi-seed analysis of a nonconvex landscape:}
 We perform multi-seed optimization campaigns for $n=3,4,5,6$ in $d=6$, allowing us to identify reproducible structures and distinct basins of attraction. The results demonstrate that different initializations may converge to qualitatively different configurations.
 
-\item \textbf{Numerical evidence of a structural transition:}
-The experiments provide reproducible numerical evidence, under the specified workflow, for a transition in the unanchored AMUB landscape: configurations with $n=3$ and $n=4$ exhibit exact or partially exact MUB relations, while all observed configurations for $n=5$ and $n=6$ are fully defective under the present workflow. This transition is observed across multiple independent runs.
+\item \textbf{Numerical case-study of a structural transition:}
+As a validation case study, our optimization campaigns provide reproducible numerical evidence for a transition in the $d=6$ unanchored landscape: configurations with $n=3$ and $n=4$ exhibit exact MUB relations, while all observed configurations for $n=5$ and $n=6$ are fully defective under the present workflow. This transition is robustly observed across multiple independent runs.
 
 \item \textbf{Precision-aware analysis:}
 We compare complex128 and complex64 implementations of the workflow. The results show that while the qualitative transition to fully defective configurations is stable across precisions, the classification of near-exact pairs and the sampling of optimization basins are sensitive to numerical precision.
@@ -765,7 +765,7 @@ These results indicate that the Taylor-series layer enables portable accelerator
 
 \section{Conclusion}
 
-This paper presented a reproducible, precision-aware workflow for unanchored approximate MUB optimization in dimension six. The workflow represents candidate bases by Lie-exponential unitary parameterizations, optimizes all bases simultaneously without fixing a reference basis, and records machine-readable artifacts including basis matrices, pairwise overlaps, diagnostics, optimization histories, and figure data.
+This paper presented a generalized, reproducible mathematical software workflow for unanchored approximate MUB optimization. The workflow is dimension-agnostic, representing candidate bases by Lie-exponential unitary parameterizations, optimizing all bases simultaneously without fixing a reference basis, and recording machine-readable artifacts. As a validation case study, we successfully applied the framework to dimension six, recovering exact configurations for small basis counts and demonstrating a robust structural transition to fully defective configurations for five or more bases.
 
 The numerical experiments provide evidence, under the specified optimization protocol, for a transition in the observed unanchored AMUB landscape. Exact or partially exact configurations are recovered for smaller numbers of bases, including exact triples and four-basis hub-and-triangle configurations. In contrast, the reported campaigns for $n=5$ and $n=6$ produce fully defective configurations under the examined near-exact tolerances. Pairwise defect spectra show that this transition is not only a change in scalar loss, but also a change in the structure of the residual pairwise defects.
 
