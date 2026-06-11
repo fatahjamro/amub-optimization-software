@@ -451,7 +451,7 @@ The optimizer is Adam. All important optimization and campaign-level hyperparame
     Step count (for $n \ge 5$) & $2000$ steps \\
     Primary numerical precision & \texttt{complex128} (double-precision reference) \\
     Secondary numerical precision & \texttt{complex64} (single-precision baseline) \\
-    Campaign seed set ($s$) & $\{0, 1, 2, 3, 4\}$ \\
+    Campaign seed set ($s$) & $\{0, 1, \ldots, 99\}$ \\
     Single-seed validation seed ($s$) & $1234$ \\
     Primary near-exact tolerance ($\tau$) & $10^{-6}$ \\
     Taylor expansion order ($N$) & $20$ (utilized on GPU backends) \\
@@ -707,7 +707,7 @@ For $n=6$, the representative low-loss basin has all fifteen pairwise losses non
 
 To evaluate the portable hardware-acceleration layer described in Section~\ref{sec:software-workflow}, we performed benchmark experiments on an Apple Silicon MacBook Pro (M1 processor) running PyTorch 2.4. We measured the average execution time (in seconds) required to perform $1000$ optimization iterations for the case $n=6$ bases, comparing CPU execution under reference \texttt{complex128} and baseline \texttt{complex64} precisions against the custom Taylor-series matrix exponential running natively on the Apple Silicon GPU via the \texttt{mps} backend. The results are summarized in Table~\ref{tab:hardware-benchmarks}.
 
-\begin{table*}[t]
+\begin{table*}[ht]
   \caption{Multi-dimensional hardware benchmark and iteration speed comparison (in seconds) per $1000$ optimization steps ($n=6$ bases) across dimensions $d=6, 12, 24, 48, 96$ on CPU vs. Apple M1 GPU (MPS). Order-$20$ Taylor expansion is utilized for the GPU backend.}
   \label{tab:hardware-benchmarks}
   \begin{tabular}{ccccc}
@@ -735,7 +735,7 @@ These results indicate that the Taylor-series layer enables portable accelerator
 
 To evaluate the scalability of the approach on enterprise-grade hardware, we additionally performed benchmark experiments on the JANUS high-performance computing cluster, which features AMD EPYC 7352 CPUs and NVIDIA A100 GPUs. As shown in Table~\ref{tab:hardware-benchmarks-janus}, the CPU baseline times grow significantly with dimension, while the NVIDIA A100 GPU maintains a nearly constant timing of approximately $26$--$28$ seconds across all dimensions up to $d=96$. The hardware crossover occurs earlier on the JANUS cluster, overtaking the double-precision CPU baseline between $d=24$ and $d=48$, and overtaking the single-precision CPU baseline at $d=96$. This confirms that the Taylor-series matrix exponential fallback delivers substantial acceleration for moderate-to-large tensor dimensions on high-performance accelerators.
 
-\begin{table*}[t]
+\begin{table*}[ht]
   \caption{Multi-dimensional hardware benchmark and iteration speed comparison (in seconds) per $1000$ optimization steps ($n=6$ bases) across dimensions $d=6, 12, 24, 48, 96$ on the JANUS HPC cluster (AMD EPYC 7352 CPU vs. NVIDIA A100 GPU). Order-$20$ Taylor expansion is utilized for the GPU backend.}
   \label{tab:hardware-benchmarks-janus}
   \begin{tabular}{ccccc}
@@ -764,7 +764,7 @@ To evaluate the scalability of the approach on enterprise-grade hardware, we add
   \label{fig:loss-summary-by-n-precision1}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[t]
   \centering
   \includegraphics[width=1.0\linewidth]{near_exact_pair_summary_by_n_precision}
   \caption{Near-exact MUB pair counts in $d=6$. This plot shows the median number of near-exact MUB pairs with corresponding ranges across 100 seeds. Near-exact pairs disappear for $n \ge 5$ under the primary tolerance, coinciding with a transition to fully defective observed configurations.}
