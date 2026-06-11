@@ -568,7 +568,7 @@ This section reports the numerical results obtained from the unanchored AMUB wor
 
 The results are numerical and should be interpreted as evidence about the optimization landscape explored by the workflow. They do not constitute a proof of existence or nonexistence of exact MUB configurations in dimension six.
 
-\subsection{Single-Seed Sweep over $n=2,\ldots,7$}
+\subsection{\texorpdfstring{Single-Seed Sweep over $n=2,\ldots,7$}{Single-Seed Sweep over n=2,...,7}}
 \label{subsec:single-seed-sweep}
 
 As an initial validation and exploratory study, we ran the complex128 reference workflow for $n=2,\ldots,7$ using a fixed seed. The results are summarized in Table~\ref{tab:single-seed-sweep}. This sweep verifies that the same parameterized workflow applies uniformly across the range from a single MUB pair to the complete-set target size $n=7$.
@@ -693,7 +693,7 @@ The $n=4$ hub-and-triangle representative has three near-zero pairwise losses an
 \graphicspath{{figures/}}
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.8\linewidth]{n4_hub_and_triangle_d6_n4_seed3}
+  \includegraphics[width=1.0\linewidth]{n4_hub_and_triangle_d6_n4_seed3}
   \caption{Representative pairwise-loss heatmap for $d=6, n=4$. The heatmap shows a hub-and-triangle structure with three near-zero losses and three nonzero losses.}
   \Description{Heatmap of the pairwise losses for the $n=4$ hub-and-triangle representative configuration. Three pairs have near-zero loss, while three pairs have approximately equal nonzero loss, consistent with a hub-and-triangle structure.}
   \label{fig:heatmap-d6-n4}
@@ -701,7 +701,7 @@ The $n=4$ hub-and-triangle representative has three near-zero pairwise losses an
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.8\linewidth]{n5_best_fully_defective_d6_n5_seed0}
+  \includegraphics[width=1.0\linewidth]{n5_best_fully_defective_d6_n5_seed0}
   \caption{Representative pairwise-loss heatmap for $d=6, n=5$. The heatmap shows a fully defective structure with all pairs having nonzero loss.}
   \Description{Heatmap of the pairwise losses for the $n=5$ fully defective representative configuration. All pairs have nonzero loss, indicating a globally defective structure.}
   \label{fig:heatmap-d6-n5}
@@ -749,7 +749,7 @@ These results indicate that the Taylor-series layer enables portable accelerator
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.8\linewidth]{loss_summary_by_n_precision}
+  \includegraphics[width=1.0\linewidth]{loss_summary_by_n_precision}
   \caption{Best AMUB loss summary in $d=6$. This plot shows the median best loss with min--max range across five seeds. The AMUB loss increases with $n$.}
   \Description{A line plot with error bars comparing AMUB best loss values for complex128 and complex64 across n equals 3, 4, 5, and 6.}
   \label{fig:loss-summary-by-n-precision1}
@@ -757,7 +757,7 @@ These results indicate that the Taylor-series layer enables portable accelerator
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.8\linewidth]{near_exact_pair_summary_by_n_precision}
+  \includegraphics[width=1.0\linewidth]{near_exact_pair_summary_by_n_precision}
   \caption{Near-exact MUB pair counts in $d=6$. This plot shows the median number of near-exact MUB pairs with corresponding ranges across five seeds. Near-exact pairs disappear for $n \ge 5$ under the primary tolerance, coinciding with a transition to fully defective observed configurations.}
   \Description{A line plot with error bars showing the number of near-exact MUB pairs for complex128 and complex64 across n equals 3, 4, 5, and 6.}
   \label{fig:near-exact-pair-summary1}
