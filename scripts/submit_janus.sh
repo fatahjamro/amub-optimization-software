@@ -29,11 +29,9 @@ if command -v module &> /dev/null; then
     module load anaconda || module load python || echo "No module command matched, proceeding with path defaults."
 fi
 
-# 2. Activate Conda Environment
-# Replace 'd6mub-optimization' if your environment has a different name
-echo "Activating conda environment..."
-source $(conda info --base)/etc/profile.d/conda.sh || true
-conda activate d6mub-optimization || conda activate base || echo "Failed to activate custom env, using current active python."
+# 2. Activate Python Virtual Environment
+echo "Activating virtualenv..."
+source venv/bin/activate || echo "Failed to activate venv, using system python."
 
 # 3. Run the Multi-Seed Campaign
 echo "Executing campaign runner..."
