@@ -1,6 +1,6 @@
-# Reproducible Precision-Aware Workflow for Unanchored Approximate MUBs in Dimension Six
+# A Generalized Software Workflow for Unanchored Approximate MUB Optimization: A Case Study in Dimension Six
 
-This repository contains the official, fully reproducible mathematical software workflow accompanying our ACM Transactions on Mathematical Software (TOMS) submission: **"A Reproducible Precision-Aware Workflow for Unanchored Approximate Mutually Unbiased Bases in Dimension Six"**.
+This repository contains the official, fully reproducible mathematical software workflow accompanying our submission to *Quantum*: **"A Generalized Software Workflow for Unanchored Approximate MUB Optimization: A Case Study in Dimension Six"**.
 
 It implements unanchored continuous approximate Mutually Unbiased Basis (AMUB) optimization using PyTorch automatic differentiation and includes a custom hardware-accelerated Taylor expansion layer to support Apple Silicon GPUs (MPS) and NVIDIA GPUs (CUDA).
 
