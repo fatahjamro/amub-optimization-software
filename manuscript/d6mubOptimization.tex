@@ -62,37 +62,37 @@ Overall, this work contributes a generalized, reproducible computational framewo
 
 This paper makes the following contributions:
 
-\begin{description}
+% \begin{description}
 
-\item \textbf{Generalized, reproducible computational workflow:}
+\textbf{Generalized, reproducible computational workflow:}
 We design and implement a fully parameterized, dimension-agnostic software workflow for optimizing approximate mutually unbiased bases in arbitrary dimensions. The workflow includes structured artifact generation (basis matrices, overlap tensors, diagnostics, optimization histories, and metadata) to support independent reproduction and expansion to higher-dimensional searches.
 
-\item \textbf{Unanchored AMUB formulation:}
+\textbf{Unanchored AMUB formulation:}
 We study a fully unanchored optimization problem in which all candidate bases are optimized simultaneously without fixing a reference basis. This formulation enables symmetric exploration of the configuration space and exposes structural patterns that are not imposed by construction.
 
-\item \textbf{Unitary-preserving parameterization:}
+\textbf{Unitary-preserving parameterization:}
 We employ a Lie-algebra-based parameterization $U_k = \exp(iH_k)$ with Hermitian generators, enforcing unitarity by construction. This separates the unitary constraint from the optimization objective and simplifies the numerical treatment.
 
-\item \textbf{Portable hardware-accelerated Taylor exponentiation:}
+\textbf{Portable hardware-accelerated Taylor exponentiation:}
 We implement a custom Taylor-series matrix exponentiation layer for complex matrices and bound its truncation error under the norm ranges observed in the experiments. This layer bypasses backend device limitations for complex matrix exponentials, enabling native acceleration on Apple Silicon GPUs (MPS) and NVIDIA GPUs (CUDA) with truncation error bounded below floating-point resolution for the generator norms observed in the reported runs.
 
-\item \textbf{Multi-seed analysis of a nonconvex landscape:}
+ \textbf{Multi-seed analysis of a nonconvex landscape:}
 We perform multi-seed optimization campaigns for $n=3,4,5,6$ in $d=6$, allowing us to identify reproducible structures and distinct basins of attraction. The results demonstrate that different initializations may converge to qualitatively different configurations.
 
-\item \textbf{Numerical case-study of a structural transition:}
+\textbf{Numerical case-study of a structural transition:}
 As a validation case study, our optimization campaigns provide reproducible numerical evidence for a transition in the $d=6$ unanchored landscape: configurations with $n=3$ and $n=4$ exhibit exact MUB relations, while all observed configurations for $n=5$ and $n=6$ are fully defective under the present workflow. This transition is robustly observed across multiple independent runs.
 
-\item \textbf{Precision-aware analysis:}
+\textbf{Precision-aware analysis:}
 We compare complex128 and complex64 implementations of the workflow. The results show that while the qualitative transition to fully defective configurations is stable across precisions, the classification of near-exact pairs and the sampling of optimization basins are sensitive to numerical precision.
 
-\item \textbf{Multi-dimensional benchmarks and performance crossover:}
+\textbf{Multi-dimensional benchmarks and performance crossover:}
 We perform multi-dimensional scaling benchmark campaigns comparing CPU and GPU runtimes across dimensions. 
 We empirically demonstrate a performance crossover point around dimension ninety, verifying that the parallelized GPU implementation successfully overcomes polynomial central processing unit scaling for high-dimensional searches.
 
-\item \textbf{Compact structural diagnostics and visualization:}
+\textbf{Compact structural diagnostics and visualization:}
 We introduce visualization strategies, including sorted pairwise-loss spectra and aggregate summary plots, that provide a concise representation of the defect structure across configurations and parameter regimes.
 
-\end{description}
+% \end{description}
 
 
 \section{Mathematical Formulation}
@@ -317,7 +317,7 @@ Across the reported multi-seed campaigns and precisions, the maximum generator n
 \begin{equation*}
     \frac{2.71^{21}}{21!} e^{2.71} \approx 3.64 \times 10^{-10}.
 \end{equation*}
-This bound concerns the mathematical Taylor truncation error only. Floating-point accumulation, matrix-multiplication roundoff, and backend-specific numerical effects are monitored through the recorded unitarity residuals and precision-comparison diagnostics. Because $T_N(iH)$ is not exactly unitary, Taylor-based GPU runs are interpreted as approximate exponential runs rather than exact Lie-exponential evaluations, and they are accompanied by the unitarity residual diagnostic $\|U_k^\dagger U_k - I_d\|_F$ defined in Section~\ref{sec:mathematical-formulation}. Since this custom layer relies exclusively on dense matrix multiplication and addition, it bypasses the MPS complex matrix exponential limitation and enables execution on the Apple M1 GPU without CPU fallback.
+To guarantee precision bounds in generalized, higher-dimensional searches, the software dynamically monitors the Frobenius norm of the generator matrix. If the norm exceeds a threshold of 3.0, the workflow issues a warning suggesting that the Taylor order $N$ be increased or the optimizer parameters adjusted. This bound concerns the mathematical Taylor truncation error only. Floating-point accumulation, matrix-multiplication roundoff, and backend-specific numerical effects are monitored through the recorded unitarity residuals and precision-comparison diagnostics. Because $T_N(iH)$ is not exactly unitary, Taylor-based GPU runs are interpreted as approximate exponential runs rather than exact Lie-exponential evaluations, and they are accompanied by the unitarity residual diagnostic $\|U_k^\dagger U_k - I_d\|_F$ defined in Section~\ref{sec:mathematical-formulation}. Since this custom layer relies exclusively on dense matrix multiplication and addition, it bypasses the MPS complex matrix exponential limitation and enables execution on the Apple M1 GPU without CPU fallback.
 
 In our workflow, the implementation automatically routes matrix exponentials based on the active device:
 \begin{itemize}
@@ -690,7 +690,7 @@ The $n=3$ exact representative has all pairwise losses at numerical zero. The $n
 
 The $n=4$ hub-and-triangle representative has three near-zero pairwise losses and three approximately equal defective losses. This supports the interpretation that the $n=4$ low-loss basin consists of a defective three-basis core together with a near-exact hub basis.
 
-\graphicspath{{../marimo/results_d6_amub_precision_campaign/heatmap_figures_representative_runs/}}
+\graphicspath{{figures/}}
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\linewidth]{n4_hub_and_triangle_d6_n4_seed3}
@@ -744,7 +744,7 @@ At $d=96$, the MPS Taylor backend completes $1000$ iterations in $48.384$ second
 These results indicate that the Taylor-series layer enables portable accelerator execution and can become favorable at larger dimensions, while preserving a CPU-native reference pathway for the structural AMUB experiments reported above.
 
 
-\graphicspath{{../results/figures/}}
+\graphicspath{{figures/}}
 
 
 \begin{figure}[ht]

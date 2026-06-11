@@ -65,3 +65,10 @@ To reproduce Table 3 (the performance crossover scaling CPU vs GPU) across matri
 python3 scripts/run_hardware_benchmarks.py
 ```
 This script automatically utilizes our custom Taylor matrix exponentiation fallback on active GPU devices (`mps` or `cuda`) and falls back gracefully to CPU if no accelerator is present.
+
+### 🖥️ 5. Run on High-Performance Computing (HPC) Clusters
+To run a large-scale, high-throughput campaign (e.g. 100 seeds) on a SLURM-managed HPC cluster like ATU's JANUS facility, submit the provided batch script:
+```bash
+sbatch scripts/submit_janus.sh
+```
+This script allocates compute resources, activates the environment, runs the 100-seed campaign using `configs/multiseed_janus_100.yaml`, and automatically compiles the summaries.

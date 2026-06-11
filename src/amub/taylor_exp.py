@@ -1,11 +1,26 @@
 import torch
 import math
 
+import warnings
+
 def taylor_matrix_exp(X: torch.Tensor, order: int = 20) -> torch.Tensor:
     """
     Compute matrix exponential via Taylor series expansion.
     Preserves device and complex precision.
     """
+    # Check if generator norm might cause large truncation error.
+    # We use Frobenius norm as a conservative, fast-to-compute upper bound for spectral norm.
+    with torch.no_grad():
+        norm_val = float(torch.linalg.matrix_norm(X, ord="fro").max().cpu().item())
+        if norm_val > 3.0:
+            warnings.warn(
+                f"Taylor matrix exponential generator Frobenius norm is large ({norm_val:.3f} > 3.0). "
+                f"The fixed Taylor order ({order}) may result in reduced precision. "
+                "Consider increasing Taylor order or reducing step size/initialization scale.",
+                RuntimeWarning,
+                stacklevel=2
+            )
+            
     eye = torch.eye(X.shape[-1], dtype=X.dtype, device=X.device)
     term = eye
     result = eye

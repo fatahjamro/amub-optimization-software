@@ -34,7 +34,8 @@ def main():
         
         dtype = meta["dtype"]
         n_bases = meta["n_bases"]
-        key = (dtype, n_bases)
+        dimension = meta.get("dimension", 6)
+        key = (dimension, dtype, n_bases)
         
         if key not in groups:
             groups[key] = []
@@ -45,7 +46,7 @@ def main():
     summary_rows_64 = []
     precision_comparison_rows = []
 
-    for (dtype, n_bases), runs in sorted(groups.items()):
+    for (dimension, dtype, n_bases), runs in sorted(groups.items()):
         losses = [run["best_loss"] for run in runs]
         near_exacts = [run["near_exact_pairs_primary"] for run in runs]
         
@@ -58,6 +59,7 @@ def main():
         near_exact_max = float(np.max(near_exacts))
         
         summary_row = {
+            "dimension": dimension,
             "n_bases": n_bases,
             "dtype": dtype,
             "loss_min": loss_min,
@@ -92,17 +94,17 @@ def main():
     # Also save representative heatmap manifests to make plotting.plot_sorted_pairwise_loss_spectra work out-of-the-box
     for dtype in ["complex128", "complex64"]:
         rep_manifest = {}
-        for (grp_dtype, n_bases), runs in groups.items():
+        for (grp_dim, grp_dtype, n_bases), runs in groups.items():
             if grp_dtype != dtype:
                 continue
             
             # Find the representative run (seed with best/median loss)
             best_run = min(runs, key=lambda r: r["best_loss"])
-            label = f"d6_n{n_bases}_{dtype}_seed{best_run['seed']}"
+            label = f"d{grp_dim}_n{n_bases}_{dtype}_seed{best_run['seed']}"
             
             # Define relative diagnostics paths for plotting script
-            diag_path = f"d6_n{n_bases}_{dtype}_seed{best_run['seed']}/pairwise_diagnostics.json"
-            overlaps_path = f"d6_n{n_bases}_{dtype}_seed{best_run['seed']}/pairwise_overlaps.npz"
+            diag_path = f"d{grp_dim}_n{n_bases}_{dtype}_seed{best_run['seed']}/pairwise_diagnostics.json"
+            overlaps_path = f"d{grp_dim}_n{n_bases}_{dtype}_seed{best_run['seed']}/pairwise_overlaps.npz"
             
             rep_manifest[label] = {
                 "n_bases": n_bases,
@@ -113,7 +115,13 @@ def main():
                 "pairwise_overlaps_path": overlaps_path,
             }
             
-        legacy_campaign_dir = results_path / f"multiseed_d6_n3_to_n6_{dtype}"
+        # We save this to a directory based on the dimension found in the group
+        # Defaults to d6 if empty
+        representative_d = 6
+        if runs:
+            representative_d = best_run.get("dimension", 6)
+            
+        legacy_campaign_dir = results_path / f"multiseed_d{representative_d}_n3_to_n6_{dtype}"
         legacy_campaign_dir.mkdir(parents=True, exist_ok=True)
         save_json(rep_manifest, legacy_campaign_dir / "representative_runs_for_heatmaps.json")
 

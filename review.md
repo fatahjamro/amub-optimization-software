@@ -77,3 +77,24 @@ This paper presented a reproducible, precision-aware workflow for unanchored app
 ```latex
 This paper presented a generalized, reproducible mathematical software workflow for unanchored approximate MUB optimization. The workflow is dimension-agnostic, representing candidate bases by Lie-exponential unitary parameterizations, optimizing all bases simultaneously without fixing a reference basis, and recording machine-readable artifacts. As a validation case study, we successfully applied the framework to dimension six, recovering exact configurations for small basis counts and demonstrating a robust structural transition to fully defective configurations for five or more bases.
 ```
+
+---
+
+# 💻 Software Generalization Review and Recommendations
+
+The core library (`src/amub`) is already mathematically dimension-agnostic. The model definition `UnanchoredAMUBModel` in `model.py` and the loss calculation in `loss.py` accept the dimension $d$ and number of bases $n$ as parameters and construct matrices accordingly.
+
+However, to align the software with the reframed "generalized workflow" story, we recommend the following minimalist updates to the runner scripts and configurations:
+
+## 1. CLI Override for Dimension and Basis Count
+Currently, runner scripts like `scripts/run_single_seed_sweep.py` and `scripts/run_multiseed_campaign.py` read parameters entirely from static YAML files.
+*   **Recommendation:** Add optional `--dimension` (`-d`) and `--n-bases` argparse arguments to `scripts/run_single_seed_sweep.py` and `scripts/run_multiseed_campaign.py` to allow users to run arbitrary dimensional sweeps directly from the terminal without editing configuration files.
+
+## 2. Dynamic Taylor Order Safety Check
+Our custom GPU-accelerated exponentiation layer uses a fixed Taylor series expansion order ($N=20$) in `src/amub/taylor_exp.py`. While highly accurate for the dimension six generators ($\|H\|_2 \approx 2.7$), higher dimensions or larger step sizes may produce generators with larger norms, causing the truncation error to grow.
+*   **Recommendation:** Implement a warning or adaptive order mechanism in `src/amub/taylor_exp.py` if the input generator matrix norm $\|X\|_2$ exceeds a threshold (e.g. $\|X\|_2 > 3.0$), protecting truncation bounds in generalized, higher-dimensional searches.
+
+## 3. Generalize the Diagnostic and Plotting Utilities
+Certain functions in `src/amub/plotting.py` might contain layout or style elements optimized primarily for $d=6$ or small values of $n$.
+*   **Recommendation:** Verify that color mappings, axis limits, and annotations scale gracefully when $d \ge 10$ or when the number of bases $n \ge 8$. Ensure labels and layout parameters are dynamically sized.
+

@@ -1,5 +1,30 @@
 [
   {
+    "dimension": 3,
+    "n_bases": 3,
+    "dtype": "complex128",
+    "loss_min": 1.1000911842339891e-30,
+    "loss_median": 1.1000911842339891e-30,
+    "loss_max": 1.1000911842339891e-30,
+    "near_exact_min": 3.0,
+    "near_exact_median": 3.0,
+    "near_exact_max": 3.0,
+    "num_seeds": 1
+  },
+  {
+    "dimension": 3,
+    "n_bases": 4,
+    "dtype": "complex128",
+    "loss_min": 3.639237222914121e-30,
+    "loss_median": 3.639237222914121e-30,
+    "loss_max": 3.639237222914121e-30,
+    "near_exact_min": 6.0,
+    "near_exact_median": 6.0,
+    "near_exact_max": 6.0,
+    "num_seeds": 1
+  },
+  {
+    "dimension": 6,
     "n_bases": 2,
     "dtype": "complex128",
     "loss_min": 1.5430550714430534e-30,
@@ -11,6 +36,7 @@
     "num_seeds": 1
   },
   {
+    "dimension": 6,
     "n_bases": 3,
     "dtype": "complex128",
     "loss_min": 3.9550897337936275e-30,
@@ -22,6 +48,7 @@
     "num_seeds": 6
   },
   {
+    "dimension": 6,
     "n_bases": 4,
     "dtype": "complex128",
     "loss_min": 0.05124921899628364,
@@ -33,6 +60,7 @@
     "num_seeds": 6
   },
   {
+    "dimension": 6,
     "n_bases": 5,
     "dtype": "complex128",
     "loss_min": 0.3596367784679414,
@@ -44,6 +72,7 @@
     "num_seeds": 6
   },
   {
+    "dimension": 6,
     "n_bases": 6,
     "dtype": "complex128",
     "loss_min": 0.8685321046831177,
@@ -55,6 +84,7 @@
     "num_seeds": 21
   },
   {
+    "dimension": 6,
     "n_bases": 7,
     "dtype": "complex128",
     "loss_min": 1.5844721331309435,
@@ -66,6 +96,7 @@
     "num_seeds": 1
   },
   {
+    "dimension": 6,
     "n_bases": 3,
     "dtype": "complex64",
     "loss_min": 3.5638159090467525e-13,
@@ -77,6 +108,7 @@
     "num_seeds": 5
   },
   {
+    "dimension": 6,
     "n_bases": 4,
     "dtype": "complex64",
     "loss_min": 0.05124921351671219,
@@ -88,6 +120,7 @@
     "num_seeds": 5
   },
   {
+    "dimension": 6,
     "n_bases": 5,
     "dtype": "complex64",
     "loss_min": 0.35963666439056396,
@@ -99,6 +132,7 @@
     "num_seeds": 5
   },
   {
+    "dimension": 6,
     "n_bases": 6,
     "dtype": "complex64",
     "loss_min": 0.8685318827629089,

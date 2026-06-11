@@ -13,10 +13,24 @@ from src.amub.io_utils import make_run_dir, save_run_artifacts, save_csv
 def main():
     parser = argparse.ArgumentParser(description="Run multi-seed AMUB optimization campaign.")
     parser.add_argument("--config", type=str, required=True, help="Path to YAML config file.")
+    parser.add_argument("--dimension", "-d", type=int, help="Override dimension parameter.")
+    parser.add_argument("--n-values", "-n", type=int, nargs="+", help="Override list of candidate bases counts.")
+    parser.add_argument("--seeds", type=int, nargs="+", help="Override list of random seeds.")
     parser.add_argument("--quick", action="store_true", help="Run a quick smoke version.")
     args = parser.parse_args()
 
     config = load_config(args.config)
+    
+    if args.dimension is not None:
+        config._raw["dimension"] = args.dimension
+        setattr(config, "dimension", args.dimension)
+    if args.n_values is not None:
+        config._raw["n_values"] = args.n_values
+        setattr(config, "n_values", args.n_values)
+    if args.seeds is not None:
+        config._raw["seeds"] = args.seeds
+        setattr(config, "seeds", args.seeds)
+
     output_root = Path(config.get("output_root", "results/runs"))
     output_root.mkdir(parents=True, exist_ok=True)
     

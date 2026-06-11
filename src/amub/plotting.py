@@ -11,6 +11,10 @@ def plot_precision_loss_summary(precision_summary_rows, figure_dir: Path):
     dtype_order = ["complex128", "complex64"]
     fig, axis_handle = plt.subplots(figsize=(7.0, 4.5))
 
+    d = 6
+    if precision_summary_rows:
+        d = precision_summary_rows[0].get("dimension", 6)
+
     for dtype_label in dtype_order:
         dtype_rows = [row for row in precision_summary_rows if row["dtype"] == dtype_label]
         dtype_rows = sorted(dtype_rows, key=lambda row: row["n_bases"])
@@ -36,8 +40,12 @@ def plot_precision_loss_summary(precision_summary_rows, figure_dir: Path):
 
     axis_handle.set_xlabel(r"Number of candidate bases $n$")
     axis_handle.set_ylabel(r"Best loss $\mathcal{L}_n$")
-    axis_handle.set_title(r"Multi-seed AMUB loss summary in $d=6$")
-    axis_handle.set_xticks([3, 4, 5, 6])
+    axis_handle.set_title(f"Multi-seed AMUB loss summary in $d={d}$")
+    
+    unique_n = sorted(list(set(row["n_bases"] for row in precision_summary_rows)))
+    if unique_n:
+        axis_handle.set_xticks(unique_n)
+        
     axis_handle.legend()
     axis_handle.grid(True, alpha=0.3)
 
@@ -57,6 +65,10 @@ def plot_near_exact_pair_summary(precision_summary_rows, figure_dir: Path):
     """
     dtype_order = ["complex128", "complex64"]
     fig, axis_handle = plt.subplots(figsize=(7.0, 4.5))
+
+    d = 6
+    if precision_summary_rows:
+        d = precision_summary_rows[0].get("dimension", 6)
 
     for dtype_label in dtype_order:
         dtype_rows = [row for row in precision_summary_rows if row["dtype"] == dtype_label]
@@ -83,8 +95,12 @@ def plot_near_exact_pair_summary(precision_summary_rows, figure_dir: Path):
 
     axis_handle.set_xlabel(r"Number of candidate bases $n$")
     axis_handle.set_ylabel("Number of near-exact MUB pairs")
-    axis_handle.set_title(r"Near-exact pair counts in $d=6$")
-    axis_handle.set_xticks([3, 4, 5, 6])
+    axis_handle.set_title(f"Near-exact pair counts in $d={d}$")
+    
+    unique_n = sorted(list(set(row["n_bases"] for row in precision_summary_rows)))
+    if unique_n:
+        axis_handle.set_xticks(unique_n)
+        
     axis_handle.set_ylim(bottom=-0.2)
     axis_handle.legend()
     axis_handle.grid(True, alpha=0.3)
