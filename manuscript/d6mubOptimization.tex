@@ -292,7 +292,7 @@ The quantity \(\ell_{ij}\) measures the total squared deviation of a pair, while
 
 Given a tolerance $\tau>0$, a pair $(i,j)$ is classified as near-exact if
 \begin{equation}
-    \delta_{ij} \leq \tau .
+    \delta_{ij} < \tau .
     \label{eq:near-exact-classification}
 \end{equation}
 The primary tolerance used in the reported summaries is \(\tau=10^{-6}\). For precision-sensitivity analysis, especially in reduced precision, near-exact counts are also recomputed using relaxed tolerances such as \(10^{-5}\) and \(10^{-4}\). This separates the recorded numerical quantities \(\ell_{ij}\) and \(\delta_{ij}\) from the tolerance-dependent classification rule.
@@ -319,208 +319,264 @@ This interpretation is particularly useful in the dimension-six experiments repo
 \section{Software Workflow and Precision Policy}
 \label{sec:software-workflow}
 
-This section describes the computational workflow used to generate and analyze the approximate MUB configurations. The workflow is designed as a reproducible mathematical-software artifact rather than as a one-off numerical experiment. It records the optimization configuration, numerical precision, backend policy, basis matrices, overlap matrices, diagnostics, and summary tables in machine-readable formats.
-The experimental protocol built on this workflow is described in Section~\ref{sec:experimental-methodology}, and the resulting numerical evidence is reported in Section~\ref{sec:results}.
+This section describes the computational workflow used to generate, diagnose, summarize, and benchmark approximate mutually unbiased basis configurations. The workflow is designed as a reproducible mathematical-software artifact rather than as a one-off numerical experiment. Each run records the optimization configuration, numerical precision, backend policy, optimized basis matrices, pairwise overlap matrices, diagnostics, optimization history, and run metadata in machine-readable formats. The experimental protocol built on this workflow is described in Section~\ref{sec:experimental-methodology}, and the resulting numerical evidence is reported in Section~\ref{sec:results}.
+
+The workflow separates four tasks: model construction, numerical optimization, diagnostic artifact generation, and post-processing. This separation is important because tables and figures can be regenerated from saved artifacts without rerunning the optimizer. It also allows the same software stack to be used for single-seed validation sweeps, full multi-seed campaigns, precision-comparison experiments, and hardware-scaling benchmarks.
 
 \subsection{Implementation Overview}
 
-The implementation is written in Python and uses PyTorch for differentiable optimization, NumPy for array storage and post-processing, and marimo notebooks for executable computational narratives. The notebook interface is used for executable presentation, while the core experiment functions are parameterized and reusable outside the notebook environment. The workflow is organized around a single parameterized experiment function that accepts the dimension $d$, the number of candidate bases $n$, the numerical dtype, random seed, optimizer settings, and output directory.
+The implementation is written in Python and uses PyTorch for differentiable optimization, NumPy for array storage and post-processing, and marimo notebooks for executable computational narratives. PyTorch~\cite{pytorch2019AnImperativeStyle} is used to represent the trainable complex matrices, evaluate the Lie-exponential forward model, compute the AMUB loss, and propagate gradients through the computational graph. NumPy is used for exporting and reloading array-based artifacts such as optimized bases and pairwise overlap tensors. The notebook interface is used for executable presentation and inspection, while the core model, loss, diagnostic, experiment, and I/O routines are parameterized and reusable outside the notebook environment.
+
+The workflow is organized around a parameterized experiment engine. A run is specified by the dimension \(d\), the number of candidate bases \(n\), the numerical dtype, random seed, optimizer settings, backend policy, matrix-exponential pathway, logging interval, tolerance list, and output directory. These parameters are supplied through configuration files and, where needed, command-line overrides.
 
 For each experiment, the workflow performs the following steps:
 \begin{enumerate}
-    \item construct an unanchored Lie-exponential AMUB model with $n$ trainable bases in $\mathbb{C}^d$;
+    \item construct an unanchored Lie-exponential AMUB model with \(n\) trainable bases in \(\mathbb{C}^d\);
+    \item initialize the random number generators and model parameters according to the run configuration;
     \item optimize the total pairwise AMUB loss using Adam;
-    \item record the best basis configuration encountered during optimization;
-    \item compute pairwise overlap diagnostics and unitarity residuals;
-    \item save basis matrices, overlap matrices, diagnostics, optimization histories, and run metadata;
-    \item aggregate results across seeds and precisions for later analysis.
+    \item track the best loss encountered during optimization and store the corresponding basis configuration;
+    \item compute pairwise overlap diagnostics, near-exact classifications, unitarity residuals, and generator-norm diagnostics;
+    \item save basis matrices, pairwise overlap matrices, diagnostics, optimization histories, and run metadata in a run-specific artifact directory;
+    \item aggregate saved runs across seeds, candidate basis counts, and precisions for later analysis.
 \end{enumerate}
 
-This design allows the same code path to be used for single-run validation, multi-seed campaigns, and precision-comparison experiments. The implementation supports the full range $n=2,\ldots,7$ used in the exploratory sweep, while the multi-seed campaigns focus on $n=3,\ldots,6$.
+Each run directory contains the optimized bases, pairwise overlap tensors, pairwise diagnostics, unitarity residuals, generator norms, run metadata, and optimization history. The artifact format is designed so that post-processing scripts can reload saved runs, recompute summaries, and regenerate figures without rerunning the optimization.
+
+This design allows the same code path to be used for single-run validation, multi-seed campaigns, precision-comparison experiments, and hardware benchmarks. In the dimension-six case study, the implementation supports the validation sweep over \(n=2,\ldots,7\), while the main 100-seed structural campaigns focus on \(n=3,\ldots,6\). The latter range is used for the main transition analysis, whereas \(n=2\) serves as a positive-control case and \(n=7\) is included as an exploratory complete-target run.
 
 \subsection{Backend Policy and Hardware Acceleration via Taylor Series}
 
-The local reference platform used for the experiments is an Apple Silicon system. PyTorch~\cite{pytorch2019AnImperativeStyle} detected the Metal Performance Shaders (MPS) backend, which provides access to Apple GPU execution through the \texttt{mps} device. However, the Lie-algebra parameterization used in this workflow requires repeated evaluation of the complex matrix exponential $\exp(iH_k)$. In the local PyTorch/MPS environment, the required complex \texttt{torch.matrix\_exp} operation was not natively implemented on the MPS backend.
-To resolve this limitation and support portable execution on non-CUDA accelerator backends, we developed a customized Taylor-series matrix exponentiation layer:
+The Lie-algebra parameterization requires repeated evaluation of complex matrix exponentials of the form \(\exp(iH_k)\). The workflow therefore treats the matrix-exponential pathway as an explicit backend policy. The main structural AMUB campaigns and precision-comparison experiments use the CPU pathway with PyTorch's native \texttt{torch.matrix\_exp} as the reference implementation. This choice separates the reported structural conclusions from accelerator-specific approximations.
+
+The workflow also supports accelerator execution. In the local Apple Silicon environment used during development, the required complex \texttt{torch.matrix\_exp} operation was not available through the PyTorch MPS execution path. To support accelerator execution in such cases, the software includes a Taylor-series matrix-exponential compatibility layer:
 \begin{equation}
-    T_N(X) = \sum_{m=0}^{N} \frac{X^m}{m!}, \qquad \exp(X) \approx T_N(X)
+    T_N(X) = \sum_{m=0}^{N} \frac{X^m}{m!},
+    \qquad
+    \exp(X) \approx T_N(X).
     \label{eq:taylor-matrix-exp}
 \end{equation}
-To quantify the truncation error of this approximation, we use the following spectral-norm bound. For a skew-Hermitian matrix $X=iH$, with $H=H^\dagger$, the truncation error of the order-$N$ Taylor series $T_N(X)$ in the spectral norm is bounded by:
+This layer expresses the matrix exponential using dense matrix multiplication and addition, preserving the active tensor dtype and device. It is used as a backend compatibility mechanism for accelerator execution and hardware benchmarking, not as the reference pathway for the main structural AMUB results.
+
+To quantify the truncation error of the Taylor approximation, we use the standard matrix-exponential remainder estimate in a submultiplicative norm~\cite{Higham2008FunctionsMatrix}. For a skew-Hermitian matrix \(X=iH\), with \(H=H^\dagger\), the order-\(N\) Taylor approximation satisfies
 \begin{equation}
-    \| \exp(X) - T_N(X) \|_2 \le \frac{\|X\|_2^{N+1}}{(N+1)!} e^{\|X\|_2}
+    \| \exp(X) - T_N(X) \|_2
+    \le
+    \frac{\|X\|_2^{N+1}}{(N+1)!} e^{\|X\|_2}.
     \label{eq:truncation-error}
 \end{equation}
-For $X=iH$ with $H=H^\dagger$, we have $\|X\|_2=\|H\|_2$. Although every unitary matrix admits a principal Hermitian logarithm with spectral norm at most $\pi$, the trainable generators in our parameterization are not explicitly constrained to this principal branch. Therefore, the workflow records generator spectral norms at saved checkpoints and at the best saved iterate, evaluating the truncation bound using the observed norms. This is the standard Taylor remainder estimate for the matrix exponential in a submultiplicative norm~\cite{Higham2008FunctionsMatrix}.
+For \(X=iH\), we have \(\|X\|_2=\|H\|_2\). The trainable generators in the workflow are not explicitly constrained to a principal logarithm branch, so the software records generator spectral norms as diagnostics. These recorded norms allow the truncation bound in~\eqref{eq:truncation-error} to be evaluated using observed generator magnitudes when Taylor-based accelerator execution is used.
 
-Across the reported multi-seed campaigns and precisions, the maximum generator norm observed at the best saved iterate was approximately $\|H_k\|_2 = 2.71$. With $N=20$, the truncation bound evaluated at this observed maximum norm is
-\begin{equation*}
-    \frac{2.71^{21}}{21!} e^{2.71} \approx 3.64 \times 10^{-10}.
-\end{equation*}
-To guarantee precision bounds in generalized, higher-dimensional searches, the software dynamically monitors the Frobenius norm of the generator matrix. If the norm exceeds a threshold of 3.0, the workflow issues a warning suggesting that the Taylor order $N$ be increased or the optimizer parameters adjusted. This bound concerns the mathematical Taylor truncation error only. Floating-point accumulation, matrix-multiplication roundoff, and backend-specific numerical effects are monitored through the recorded unitarity residuals and precision-comparison diagnostics. Because $T_N(iH)$ is not exactly unitary in finite-precision arithmetic, Taylor-based GPU runs are interpreted as approximate exponential runs rather than exact Lie-exponential evaluations, and they are accompanied by the unitarity residual diagnostic $\|U_k^\dagger U_k - I_d\|_F$ defined in Section~\ref{sec:mathematical-formulation}. Empirically, these monitored residuals remain extremely small, consistently measuring below $10^{-9}$ for both the Apple Silicon MPS and NVIDIA A100 CUDA runs, confirming that the Taylor series approximation maintains numerical unitarity below the physical tolerance thresholds of the MUB search. Since this custom layer relies exclusively on dense matrix multiplication and addition, it bypasses the MPS complex matrix exponential limitation and enables execution on the Apple M1 GPU without CPU fallback.
+The Taylor layer also includes a runtime norm safeguard. It monitors the Frobenius norm of the exponent matrix and issues a warning if this norm exceeds the configured threshold of \(3.0\). The warning indicates that the fixed Taylor order may be insufficient and recommends increasing the Taylor order or adjusting optimization parameters. The Frobenius norm is used as a fast conservative proxy for the spectral norm because
+\[
+    \|X\|_2 \leq \|X\|_F .
+\]
+This safeguard does not replace the recorded diagnostics: truncation error, floating-point accumulation, matrix-multiplication roundoff, and backend-specific numerical effects are assessed through generator norms, Taylor-vs-native comparison tests where applicable, and unitarity residuals.
 
-In our workflow, the implementation automatically routes matrix exponentials based on the active device:
+Because \(T_N(iH)\) is not exactly unitary in finite-precision arithmetic, Taylor-based accelerator runs are interpreted as approximate exponential runs. They are accompanied by the same unitarity residual diagnostic
+\[
+    \|U_k^\dagger U_k - I_d\|_F
+\]
+used throughout the workflow. Thus, accelerator runs can be benchmarked and inspected without conflating Taylor-approximation effects with the CPU/native reference structural experiments.
+
+In the implemented backend policy, matrix exponentials are routed as follows:
 \begin{itemize}
-    \item On CPU, it uses PyTorch's native \texttt{torch.matrix\_exp(1j * H)} as reference implementation.
-    \item On GPU (\texttt{mps} or \texttt{cuda}), it dynamically employs the Taylor-series expansion layer to avoid \texttt{NotImplementedError} or CPU-fallback bottlenecks.
+    \item On CPU reference runs, the workflow uses PyTorch's native \texttt{torch.matrix\_exp(1j * H)}.
+    \item On accelerator runs where the Taylor pathway is selected or required, the workflow uses the Taylor-series compatibility layer with the configured Taylor order.
 \end{itemize}
 
-This backend policy enables running the identical unanchored AMUB optimization workflow across CPUs, Apple Silicon GPUs, and NVIDIA CUDA platforms, which we evaluate in Section~\ref{subsec:hardware-benchmarks}.
+This policy enables the same unanchored AMUB model, loss function, diagnostics, and artifact format to be used across CPU, Apple Silicon/MPS, CUDA-capable GPU, and HPC execution environments. Hardware-scaling results for the accelerator pathway are reported in Section~\ref{subsec:hardware-benchmarks}.
 
 \subsection{Precision Policy}
 
-The workflow treats numerical precision as part of the experimental configuration. The complex128 implementation is used as the reference precision because the diagnostics involve small residuals, near-exact pair classifications, and unitarity checks. The workflow records sufficient diagnostics to test the stability of near-exact classifications under multiple tolerances.
+The workflow treats numerical precision as an explicit part of the experimental configuration. The main reference structural campaign uses \texttt{complex128} arithmetic. This precision is used as the reference because the analysis depends on small residuals, near-exact pair classifications, pairwise maximum deviations, and unitarity checks.
 
-A complex64 version of the same workflow is used as a precision-sensitivity experiment. The purpose of the complex64 campaign is not to replace the complex128 reference, but to examine whether the qualitative structure of the AMUB landscape is preserved under reduced complex precision. In particular, the workflow compares loss values, near-exact pair counts, basin diversity, and unitarity residuals across complex128 and complex64.
+A corresponding \texttt{complex64} campaign is used as a precision-sensitivity experiment. The purpose of the \texttt{complex64} campaign is not to replace the \texttt{complex128} reference, but to test which qualitative structures persist under reduced complex precision. The precision comparison uses the same structural pathway as the reference campaign: CPU execution with native \texttt{torch.matrix\_exp}. This design isolates floating-point precision effects from accelerator-specific Taylor-exponential effects.
 
-For near-exact pair classification, the primary tolerance is $10^{-6}$ in the reported summaries. Because complex64 arithmetic has lower numerical resolution, the workflow also recomputes near-exact counts using relaxed tolerances, including $10^{-5}$ and $10^{-4}$, to distinguish genuine structural changes from tolerance-sensitive classifications.
+For each precision, the workflow records the same diagnostics: best loss, individual pairwise losses, maximum entrywise deviations, near-exact pair counts, unitarity residuals, generator norms, and optimization histories. The comparison therefore focuses on both scalar outcomes and structural diagnostics, including loss statistics, near-exact pair counts, basin selection, and tolerance sensitivity.
+
+For near-exact pair classification, the primary tolerance used in the reported summaries is
+\[
+    \tau = 10^{-6}.
+\]
+Because reduced precision can affect maximum entrywise deviations and near-exact classifications, the workflow also recomputes near-exact counts using relaxed tolerances, including
+\[
+    10^{-5}
+    \quad\text{and}\quad
+    10^{-4}.
+\]
+The recorded quantities \(\ell_{ij}\) and \(\delta_{ij}\) are therefore kept separate from the tolerance-dependent near-exact classification. This separation allows the paper to distinguish changes in the underlying pairwise defects from changes caused by the chosen numerical threshold.
 
 \subsection{Optimization Components}
 
-Each run constructs a model consisting of $n$ trainable complex matrices $A_1,\ldots,A_n$. These matrices are converted to Hermitian generators by
+Each run constructs an unanchored AMUB model consisting of $n$ trainable complex matrices $A_1,\ldots,A_n$. For each basis index $k$, the trainable matrix $A_k$ is converted to a Hermitian generator by
 \begin{equation*}
     H_k = \frac{A_k + A_k^\dagger}{2},
 \end{equation*}
-and each basis is generated by
+and the corresponding candidate basis is generated by
 \begin{equation*}
     U_k = \exp(iH_k).
 \end{equation*}
-The AMUB loss is then evaluated over all $\binom{n}{2}$ basis pairs.
+The AMUB objective is then evaluated over all $\binom{n}{2}$ unordered basis pairs using the pairwise loss defined in Eq.~\eqref{eq:pairwise-loss}. Thus, the number of pairwise AMUB constraints grows quadratically with the number of candidate bases.
 
-The optimization uses the Adam optimizer with fixed hyperparameters recorded in the run metadata and summarized for complete reproducibility in Table~\ref{tab:hyperparameters} (see Section~\ref{sec:experimental-methodology}). During optimization, the workflow tracks both the current loss and the best loss encountered. The basis matrices corresponding to the best observed loss are retained for post-processing and artifact export.
+The optimization uses the Adam optimizer. The learning rate, initialization scale, step count, logging interval, dtype, backend, random seed, and matrix-exponential pathway are part of the run configuration and are recorded in the run metadata. The hyperparameters used in the reported campaigns are summarized in Table~\ref{tab:hyperparameters} in Section~\ref{sec:experimental-methodology}.
 
-The workflow does not claim that the resulting configurations are global minimizers. The objective is nonconvex, and different random seeds may converge to different basins. For this reason, multi-seed campaigns are used to identify recurrent structures and basin diversity.
+During optimization, the workflow records both the current loss and the best loss encountered so far. When a new best loss is found, the corresponding basis matrices are retained for post-processing and artifact export. The saved diagnostics and summaries are therefore computed from the best recorded configuration rather than from an arbitrary final iterate. This is important because the objective is nonconvex and the optimizer trajectory may fluctuate within a local basin.
+
+The workflow does not claim that the resulting configurations are global minimizers. The AMUB objective is nonconvex, and different random seeds can converge to different local basins. For this reason, the main structural experiments use multi-seed campaigns: the purpose is to identify recurrent configurations, basin diversity, and precision-sensitive behavior under a fixed parameterization, optimizer, seed set, and tolerance policy.
 
 \subsection{Saved Artifacts}
 
-For each run, the workflow writes a self-contained artifact directory. The directory name encodes the dimension, number of bases, dtype, and seed. Each run directory contains:
+For each run, the workflow writes a self-contained artifact directory. The directory name encodes the dimension, number of bases, numerical dtype, and seed:
+\[
+\texttt{d\{d\}\_n\{n\}\_\{dtype\}\_seed\{seed\}}.
+\]
+For example, a complex128 run in dimension six with four candidate bases and seed 1234 is stored in a directory of the form
+\[
+\texttt{d6\_n4\_complex128\_seed1234}.
+\]
+
+Each run directory contains:
 \begin{itemize}
-    \item \texttt{best\_bases.npy}, storing the optimized basis matrices;
-    \item \texttt{pairwise\_overlaps.npz}, storing all matrices $|U_i^\dagger U_j|^2$;
-    \item \texttt{pairwise\_diagnostics.json}, storing pairwise losses, maximum deviations, and overlap statistics;
-    \item \texttt{unitarity\_residuals.json}, storing the residuals $\|U_i^\dagger U_i - I\|_2$ to verify numerical orthonormality;
-    \item \texttt{generator\_norms.json}, storing norms of the Lie-algebra generator parameters;
-    \item \texttt{optimization\_history.csv}, storing the loss trace recorded during optimization;
-    \item \texttt{run\_metadata.json}, storing problem parameters, optimizer settings, dtype, backend policy, and diagnostic summaries.
+    \item \texttt{best\_bases.npy}, storing the optimized basis matrices associated with the best recorded loss;
+    \item \texttt{pairwise\_overlaps.npz}, storing the pairwise squared-modulus overlap matrices \( |U_i^\dagger U_j|^2 \) for all unordered pairs \(i<j\);
+    \item \texttt{pairwise\_diagnostics.json}, storing pairwise losses, maximum entrywise deviations, near-exact classifications, and overlap statistics;
+    \item \texttt{unitarity\_residuals.json}, storing the Frobenius residuals \( \|U_i^\dagger U_i - I\|_F \) used to monitor numerical orthonormality;
+    \item \texttt{generator\_norms.json}, storing norm diagnostics for the Hermitian Lie-algebra generators;
+    \item \texttt{optimization\_history.csv}, storing the logged optimization trace, including current loss, best loss, step index, and elapsed time;
+    \item \texttt{run\_metadata.json}, storing problem parameters, optimizer settings, dtype, backend policy, matrix-exponential pathway, tolerance settings, software versions, runtime information, and diagnostic summaries.
 \end{itemize}
 
-Campaign-level summaries are also saved. These include per-run CSV files, aggregate JSON summaries by $n$ and dtype, precision-comparison summaries, representative-run manifests, and figure-data JSON files. The artifact structure is intended to make it possible to inspect the reported results without rerunning the full optimization.
+The artifact structure separates optimization from analysis. Once a run has been completed, the optimized bases and diagnostics can be reloaded from disk for verification, summarization, and visualization without rerunning the optimizer. This is used by the post-processing workflow to generate campaign-level summaries, including precision-comparison tables, hardware-benchmark summaries, and representative-run manifests. These machine-readable summaries provide the numerical inputs for the tables and figures reported in Section~\ref{sec:results}.
+
 
 \subsection{Visualization Workflow}
 
-The visualization stage is separated from the optimization stage. Rather than recomputing optimized bases, visualization routines load the saved overlap matrices and diagnostics from disk. This separation reduces ambiguity between computation and post-processing.
+The visualization stage is separated from the optimization stage. Visualization routines load saved overlap matrices, pairwise diagnostics, and campaign summaries from disk rather than recomputing optimized bases. This design ensures that the numerical data used for figures are the same saved artifacts used for tabular summaries.
 
-The workflow produces two types of visual summaries. First, aggregate plots show loss statistics and near-exact pair counts as functions of $n$ and numerical precision. Second, sorted pairwise-loss spectra show the distribution of pairwise defects within representative configurations. These compact spectra are used in the main paper because full heatmap grids become large as $n$ increases. Full pairwise overlap heatmaps are retained as supporting artifacts.
+The workflow produces aggregate visual summaries and representative-configuration visualizations. Aggregate plots summarize loss statistics and near-exact pair counts as functions of the candidate basis count \(n\), dtype, and tolerance policy. These plots are generated from campaign-level summaries rather than from individual optimization traces.
+
+For representative configurations, the workflow uses the saved pairwise diagnostics to construct sorted pairwise-loss spectra. Given a configuration with \(n\) bases, the \(\binom{n}{2}\) pairwise losses \(\ell_{ij}\) are sorted and plotted as a compact spectrum of defect values. This representation makes it possible to distinguish configurations with localized defect from configurations in which every pair is defective.
+
+Full pairwise overlap heatmaps are also generated for selected representative runs. These heatmaps display the matrices \( |U_i^\dagger U_j|^2 \) directly. Because the number of pairwise matrices grows as \(\binom{n}{2}\), full heatmap grids become increasingly large as \(n\) increases. For this reason, the main text emphasizes aggregate summaries and sorted pairwise-loss spectra, while full heatmaps are retained as supporting visualization artifacts.
 
 \subsection{Software Generalization and Multi-Dimensional Scalability}
 \label{subsec:software-scalability}
 
-Although the experiments in this paper focus on the longstanding open problem in $d=6$, the PyTorch-based unanchored software architecture is fully generalized and scalable to arbitrary dimensions $d$ and candidate basis counts $n$. A researcher can adapt the workflow to study approximate MUBs in $d=7, 8$, or composite dimensions like $d=10$ and $d=12$ simply by passing the desired parameters to the core model instantiation:
+Although the numerical case study in this paper focuses on dimension six, the software architecture is parameterized by the dimension \(d\) and the number of candidate bases \(n\). The same model class can be instantiated with different values of \(d\) and \(n\), subject to the available memory, runtime budget, and backend support. For example, a run in dimension \(10\) with eight candidate bases can be initialized by passing the corresponding parameters to the model:
 {\small
 \begin{verbatim}
 model = UnanchoredAMUBModel(d=10, n_bases=8)
 \end{verbatim}
 }
 
-The same software architecture may be adapted to related unitary-constrained search problems, such as Quantum Latin Squares~\cite{musto2019QuantumLatinSquares}, Unitary Error Bases~\cite{knill1996NonBinaryUnitary}, and biunitary matrices~\cite{Vicary_2019BiunitaryConstructions}, after replacing the AMUB loss with problem-specific constraint losses.
+The mathematical components of the workflow are also modular. The current implementation uses the AMUB loss defined in Eq.~\eqref{eq:total-loss}, but the same Lie-exponential unitary parameterization and artifact pipeline can be reused for other unitary-constrained search problems after replacing the loss function. Examples of related structures include Quantum Latin Squares~\cite{musto2019QuantumLatinSquares}, Unitary Error Bases~\cite{knill1996NonBinaryUnitary}, and biunitary matrices~\cite{Vicary_2019BiunitaryConstructions}. Such adaptations are outside the scope of the present experiments, but the software organization separates the unitary model from the problem-specific constraint loss.
 
-As the dimension increases, the dense matrix operations become more computationally intensive, and hardware acceleration is expected to become more favorable. The benchmark results in~\ref{subsec:hardware-benchmarks} quantify this trend for the tested dimensions and extrapolate the observed crossover behavior. The benchmark results suggest that, as dimension increases, the larger dense linear-algebra workload can amortize fixed accelerator-launch overheads, making GPU execution increasingly favorable for larger-dimensional searches such as larger-dimensional quantum combinatorial design searches.
+The benchmark experiments in Section~\ref{subsec:hardware-benchmarks} evaluate scaling on the tested dimension grid
+\[
+d \in \{6,12,24,48,96\}.
+\]
+These benchmarks compare CPU/native matrix-exponential execution with accelerator execution using the Taylor-series compatibility pathway. The results show that GPU execution is slower at small dimensions on the tested benchmark grid, where fixed accelerator overheads dominate. At larger tested dimensions, the increased dense linear-algebra workload changes the runtime balance: in the reported benchmark summary, the GPU becomes faster between \(d=24\) and \(d=48\) for complex128, and between \(d=48\) and \(d=96\) for complex64.
+
+These benchmark results are used only to characterize the performance of the implemented workflow on the tested configurations. They do not alter the interpretation of the main structural AMUB experiments, which use the CPU/native matrix-exponential reference pathway. Rather, they demonstrate that the same software design can be executed across local and HPC-style backends, with backend choice treated as an explicit part of the experimental configuration.
 
 \section{Experimental Methodology}
 \label{sec:experimental-methodology}
 
-This section describes the numerical experiments used to evaluate the unanchored AMUB workflow in dimension six. The experiments are designed to study the structure of optimized approximate MUB configurations as the number of candidate bases increases, and to assess the sensitivity of the observed structures to random initialization and numerical precision.
+This section describes the numerical experiments used to evaluate the unanchored AMUB workflow in dimension six. The experiments are designed to study how optimized approximate MUB configurations change as the number of candidate bases increases, and to assess how the observed configurations depend on random initialization, numerical precision, and backend policy.
+
+The experimental design has three components. First, a single-seed validation sweep over \(n=2,\ldots,7\) verifies that the same parameterized implementation runs from the positive-control two-basis case to the formal complete-set target \(n=d+1=7\) in dimension six. Second, 100-seed campaigns over \(n=3,4,5,6\) provide a reproducible empirical sample of the nonconvex basins reached by the specified optimizer, initialization scale, step schedule, and tolerance policy. Third, precision-comparison and hardware-benchmark experiments separate structural numerical results from backend-specific acceleration effects.
 
 \subsection{Experimental Goals}
 
 The experiments address three questions.
 
-First, we ask how the optimized AMUB configurations change as the number of candidate bases increases from small collections to the complete-set target size. The complete-set target $n=7$ in $d=6$is included as an exploratory single-seed case, while the main multi-seed analysis focuses on $n=3,\ldots,6$.
+First, we ask how the optimized AMUB configurations change as the number of candidate bases increases. The single-seed sweep covers \(n=2,\ldots,7\), including both the positive-control two-basis case and the complete-set target \(n=7\) in \(d=6\). The complete-target case is included as an exploratory run only; it is not used by itself to draw statistical conclusions about complete MUB existence or nonexistence in dimension six.
 
+Second, we ask whether the observed structures are stable under random initialization. Because the AMUB objective is nonconvex, one run may converge to a local basin that is not representative of the outcomes reached from other initializations. We therefore perform 100-seed campaigns for \(n=3,4,5,6\), using the same optimizer settings and seed set for the reported complex128 and complex64 campaigns.
 
-Second, we ask whether observed structures are robust to random initialization. Because the objective is nonconvex, a single run may not be representative of the optimization landscape. We therefore perform multi-seed campaigns for selected values of $n$.
-
-Third, we ask whether the qualitative structures observed in the complex128 reference workflow persist under complex64 execution. This precision comparison is intended to distinguish robust structural features from precision-sensitive diagnostics or basin-selection effects.
+Third, we ask whether the qualitative structures observed in the complex128 reference workflow persist under complex64 arithmetic. This precision comparison is designed to distinguish structures that are stable across precision from effects caused by reduced numerical resolution, tolerance-sensitive near-exact classifications, or precision-dependent basin selection.
 
 \subsection{Single-Seed Sweep over Candidate Basis Counts}
 
-As an initial validation and exploratory sweep, the workflow is run for $n=2,\ldots,7$ using the complex128 reference precision and a fixed random seed. 
-This sweep serves two purposes. First, it verifies that the same parameterized implementation can handle all candidate-basis counts in the range $2 \leq n \leq 7$, from the basic two-basis case to the formal complete-set target $n=d+1=7$ in dimension $d=6$. Second, it produces representative configurations and saved artifacts for preliminary inspection before the multi-seed campaigns.
+As an initial validation and exploratory sweep, the workflow is run for \(n=2,\ldots,7\) using complex128 precision, the CPU backend, PyTorch's native \texttt{torch.matrix\_exp} pathway, and fixed seed \(s=1234\). This sweep serves two purposes. First, it verifies that the same parameterized implementation can handle all candidate-basis counts in the range \(2 \leq n \leq 7\), from a single pair of candidate bases to the formal complete-set target \(n=d+1=7\) in dimension \(d=6\). Second, it produces saved artifacts and representative configurations for preliminary inspection before the multi-seed campaigns.
 
-The case $n=2$ is included as a positive control, since an unbiased pair is known to be attainable and should correspond to a near-zero AMUB loss under successful optimization. The case $n=7$ is included as an exploratory complete-target run, but it is not used by itself to draw statistical conclusions about the existence or nonexistence of complete MUB sets in dimension six.
+The case \(n=2\) is included as a positive-control case, since an unbiased pair is known to be attainable and should correspond to a near-zero AMUB loss under successful optimization. The case \(n=7\) is included as an exploratory complete-target run. A single \(n=7\) run is not used to make statistical claims about the existence or nonexistence of complete MUB sets in dimension six.
 
-For each value of $n$, the workflow constructs $n$ trainable bases in $\mathbb{C}^6$, optimizes the AMUB loss, records the best configuration encountered during optimization, and saves the corresponding artifacts. The number of unordered pairwise AMUB constraints grows as
+For each value of \(n\), the workflow constructs \(n\) trainable bases in \(\mathbb{C}^6\), optimizes the AMUB loss, records the best configuration encountered during optimization, computes the diagnostics defined in Section~\ref{sec:mathematical-formulation}, and saves the corresponding artifacts. The number of unordered pairwise AMUB terms grows as
 \begin{equation*}
     \binom{n}{2},
 \end{equation*}
-so the sweep also provides a basic computational check that the implementation scales consistently with the number of basis pairs.
+so the sweep also checks that artifact generation and pairwise diagnostic computation operate correctly across increasing numbers of basis pairs.
 
-The single-seed sweep is not used as a statistical characterization of the nonconvex optimization landscape. Instead, it serves as a validation and exploratory step that motivates the subsequent multi-seed campaigns, where initialization sensitivity, basin diversity, and precision effects are examined more systematically.
+The single-seed sweep is not used as a statistical characterization of the nonconvex optimization landscape. Instead, it is used as a validation and exploratory step that motivates the subsequent multi-seed campaigns, where initialization sensitivity, basin diversity, and precision effects are examined more systematically.
 
 \subsection{Multi-Seed Campaigns}
 
-To assess sensitivity to initialization, we perform multi-seed campaigns for $n = 3,4,5,6$.
-These values are selected because they cover the transition from exact or partially exact configurations to fully defective configurations in the observed landscape. The case $n=2$ is used as a basic positive-control case and is not the focus of the multi-seed study. The case $n=7$ is included in the single-seed sweep as the complete-set target, but the multi-seed campaigns reported here focus on $n=3,\ldots,6$.
+To assess sensitivity to initialization, we perform multi-seed campaigns for
+\[
+n \in \{3,4,5,6\}.
+\]
+These values are selected because they cover the main transition regime observed in the workflow: exact or near-exact three-basis configurations, structured four-basis partial-exact configurations, and fully defective observed configurations for larger candidate basis counts. The case \(n=2\) is used as a positive-control case in the single-seed sweep and is not the focus of the multi-seed study. The case \(n=7\) is included in the single-seed sweep as the complete-set target, but the reported multi-seed campaigns focus on \(n=3,\ldots,6\).
 
-For each $n$ in the multi-seed campaign, the workflow runs 100 independent seeds: 
+For each \(n\) in the multi-seed campaign, the workflow runs 100 independent seeds:
 \begin{equation*}
 s \in \{0,1,\ldots,99\}.
 \end{equation*}
-This larger-scale campaign is designed to provide a robust characterization of basin diversity and stability across random initializations. The workflow is designed to support arbitrary seed pools without changing the experimental code path.
+This campaign provides a reproducible empirical sample of the basins reached by the specified unanchored Lie-exponential parameterization, Adam optimizer, initialization scale, step schedule, dtype, and tolerance policy. It should not be interpreted as a complete characterization of the full nonconvex landscape.
 
-For every pair $(n,s)$, the model is reinitialized, optimized, diagnosed, and saved independently. The reported multi-seed summaries include the minimum, median, and maximum best loss over the 100 seeds, and the min/median/max near-exact MUB pairs observed.
+For every pair \((n,s)\), the model is reinitialized, optimized, diagnosed, and saved independently. The reported multi-seed summaries include the minimum, median, and maximum best loss over the 100 seeds, together with the minimum, median, and maximum number of near-exact basis pairs observed under the primary tolerance.
 
 \subsection{Optimization Settings}
 
-All experiments use the same unanchored Lie-exponential parameterization described in Section~\ref{sec:mathematical-formulation}. The trainable variables are unconstrained complex matrices $A_k$, which are symmetrized to Hermitian matrices $H_k$ before exponentiation.
+All structural experiments use the unanchored Lie-exponential parameterization described in Section~\ref{sec:mathematical-formulation}. The trainable variables are unconstrained complex matrices \(A_k\), which are symmetrized to Hermitian matrices \(H_k\) before exponentiation. The AMUB loss is evaluated over all unordered basis pairs.
 
-
-The optimizer is Adam. All important optimization and campaign-level hyperparameters are summarized in Table~\ref{tab:hyperparameters} to ensure full experimental reproducibility. The optimization history stores the current loss and best loss at regular logging intervals.
+The optimizer is Adam. The learning rate, initialization scale, step count, logging interval, dtype, backend, matrix-exponential pathway, random seed, and tolerance list are specified by the run configuration and recorded in the run metadata. The optimization history stores the current loss and best loss at regular logging intervals.
 
 \begin{table*}[t]
-  \caption{Optimization and campaign-level hyperparameters used in the reported AMUB campaigns.\\ The Taylor order applies only to GPU-backend timing experiments.}
+  \caption{Optimization and campaign-level hyperparameters used in the reported AMUB campaigns. The Taylor order applies only to accelerator-backend timing experiments, not to the CPU/native structural campaigns.}
   \label{tab:hyperparameters}
   \begin{tabular}{ll}
     \toprule
     Hyperparameter & Value / Setting \\
     \midrule
     Optimizer & Adam \\
-    Learning rate ($\eta$) & $0.02$ \\
-    Initialization scale & $0.05$ \\
-    Step count (for $n < 5$) & $1500$ steps \\
-    Step count (for $n \ge 5$) & $2000$ steps \\
-    Primary numerical precision & \texttt{complex128} (double-precision reference) \\
-    Secondary numerical precision & \texttt{complex64} (single-precision baseline) \\
-    Campaign seed set ($s$) & $\{0, 1, \ldots, 99\}$ \\
-    Single-seed validation seed ($s$) & $1234$ \\
-    Primary near-exact tolerance ($\tau$) & $10^{-6}$ \\
-    Taylor expansion order ($N$) & $20$ (utilized on GPU backends) \\
+    Learning rate (\(\eta\)) & \(0.02\) \\
+    Initialization scale & \(0.05\) \\
+    Step count (for \(n < 5\)) & \(1500\) steps \\
+    Step count (for \(n \ge 5\)) & \(2000\) steps \\
+    Primary numerical precision & \texttt{complex128} reference campaign \\
+    Secondary numerical precision & \texttt{complex64} precision-sensitivity campaign \\
+    Structural experiment backend & CPU \\
+    Structural matrix-exponential pathway & native \texttt{torch.matrix\_exp} \\
+    Campaign seed set (\(s\)) & \(\{0,1,\ldots,99\}\) \\
+    Single-seed validation seed (\(s\)) & \(1234\) \\
+    Primary near-exact tolerance (\(\tau\)) & \(10^{-6}\) \\
+    Additional near-exact tolerances & \(10^{-5}\), \(10^{-4}\) \\
+    Taylor expansion order (\(N\)) & \(20\) for accelerator timing experiments \\
     \bottomrule
   \end{tabular}
 \end{table*}
 
-During optimization, the workflow tracks the best loss encountered rather than relying only on the final iterate. This is important because the objective is nonconvex and the Adam iterates may fluctuate within a basin. The basis matrices corresponding to the best observed loss are retained and used for all subsequent diagnostics and artifact generation.
+During optimization, the workflow tracks the best loss encountered rather than relying only on the final iterate. The basis matrices corresponding to the best observed loss are retained and used for subsequent diagnostics and artifact generation. This is important because the objective is nonconvex and Adam iterates can move within or between local regions during optimization.
 
-
-As detailed in Table~\ref{tab:hyperparameters}, the workflow uses a base step count of $1500$ steps for smaller configurations ($n < 5$) and an increased step count of $2000$ steps for harder cases with $n \ge 5$ bases to allow sufficient convergence in the higher-dimensional constraint landscapes.
+As summarized in Table~\ref{tab:hyperparameters}, the reported structural campaigns use \(1500\) steps for \(n<5\) and \(2000\) steps for \(n\geq 5\). These values are part of the fixed experimental protocol used for the reported results.
 
 \subsection{Precision Campaigns}
 
-The complex128 workflow is treated as the reference implementation. This precision is used for the main structural analysis because the diagnostics include small unitarity residuals, near-exact pair classifications, and pairwise deviations from $1/6$.
+The complex128 workflow is treated as the reference structural campaign. This precision is used for the main structural analysis because the diagnostics include small pairwise deviations from \(1/6\), near-exact pair classifications, and unitarity residuals.
 
-A corresponding complex64 campaign is run using the same parameterized workflow, the same values of $n$, and the same seed set for the multi-seed experiments. The purpose of the complex64 campaign is not to replace the complex128 reference results, but to evaluate whether the same qualitative structures persist under reduced complex precision.
+A corresponding complex64 campaign is run using the same parameterized workflow, the same values of \(n\), the same seed set \(s\in\{0,\ldots,99\}\), and the same optimizer settings. The purpose of the complex64 campaign is not to replace the complex128 reference results, but to evaluate which qualitative structures persist under reduced complex precision.
 
-
-To isolate numerical precision effects from Taylor truncation errors, the primary structural AMUB experiments and precision-comparison campaigns are executed entirely on the CPU backend using PyTorch's native \texttt{torch.matrix\_exp} implementation. Unless otherwise stated, the precision-comparison campaigns use this reference CPU pathway, separating backend-specific Taylor GPU execution and timing experiments (Section~\ref{subsec:hardware-benchmarks}) from the AMUB structural analysis.
-
+To isolate numerical precision effects from Taylor-truncation or accelerator-backend effects, the primary structural AMUB experiments and precision-comparison campaigns are executed on the CPU backend using PyTorch's native \texttt{torch.matrix\_exp} implementation. Unless otherwise stated, the precision-comparison results therefore refer to this CPU/native reference pathway. Backend-specific Taylor execution is considered separately in the hardware benchmark experiments in Section~\ref{subsec:hardware-benchmarks}.
 
 The precision comparison focuses on:
 \begin{itemize}
-    \item best loss statistics over seeds;
-    \item number of near-exact basis pairs;
-    \item basin diversity as indicated by rounded best losses;
+    \item best loss statistics over the 100 seeds;
+    \item the number of near-exact basis pairs under the primary tolerance;
+    \item tolerance sensitivity of near-exact classifications;
+    \item basin diversity as reflected in the distribution of best losses;
     \item unitarity residuals;
-    \item stability of the transition from partial exactness to fully defective configurations.
+    \item stability of the observed transition from exact or partial-exact configurations to fully defective observed configurations.
 \end{itemize}
 
 \subsection{Near-Exact Pair Classification}
@@ -536,90 +592,105 @@ For each optimized configuration, we compute the maximum entrywise deviation
     \frac{1}{6}
     \right|
 \end{equation*}
-for every pair $(i,j)$. A pair is classified as near-exact $\delta_{ij}\le \tau$.
-
-The primary tolerance used in the summary tables is
+for every pair $(i,j)$. Given a tolerance \(\tau>0\), a pair is classified as near-exact when
 \begin{equation*}
-    10^{-6}.
+    \delta_{ij} < \tau .
 \end{equation*}
-For precision-sensitivity analysis, particularly for complex64 runs, the near-exact counts are also recomputed using relaxed tolerances
+
+The primary tolerance used in the reported summary tables is
+\begin{equation*}
+    \tau = 10^{-6}.
+\end{equation*}
+For precision-sensitivity analysis, especially for \texttt{complex64} runs, the workflow also recomputes near-exact counts using the relaxed tolerances
 \begin{equation*}
     10^{-5}
     \quad \text{and} \quad
     10^{-4}.
 \end{equation*}
-This additional check is used to determine whether changes in near-exact pair counts reflect genuine structural differences or tolerance-sensitive numerical effects.
+The quantities \(\ell_{ij}\) and \(\delta_{ij}\) are recorded independently of the classification threshold. This separation is important because a change in near-exact pair count may reflect either a change in the underlying overlap defects or a tolerance-sensitive classification near the chosen threshold.
 
 \subsection{Pairwise Structural Diagnostics}
 
-The scalar loss $\mathcal{L}_n$ is not sufficient to characterize the geometry of an optimized configuration. Therefore, the workflow records pairwise diagnostics for every pair $(i,j)$, including:
+The scalar loss \(\mathcal{L}_n\) is not sufficient to characterize the geometry of an optimized configuration. Two configurations can have similar aggregate losses while distributing their pairwise defects differently across basis pairs. Therefore, the workflow records pairwise diagnostics for every unordered pair \((i,j)\), including:
 \begin{itemize}
-    \item pairwise loss contribution $\ell_{ij}$;
-    \item minimum, maximum, mean, and standard deviation of $|U_i^\dagger U_j|^2$;
-    \item maximum absolute deviation $\delta_{ij}$ from $1/6$;
-    \item near-exact classification under the selected tolerance.
+    \item the pairwise loss contribution \(\ell_{ij}\);
+    \item the minimum, maximum, mean, and standard deviation of the entries of \(|U_i^\dagger U_j|^2\);
+    \item the maximum absolute deviation \(\delta_{ij}\) from \(1/6\);
+    \item near-exact classifications under the configured tolerances.
 \end{itemize}
 
-The pairwise losses are used to identify structural patterns such as defective triangles, hub-and-triangle configurations, and globally distributed defect. Here a hub-and-triangle configuration denotes one basis forming near-exact pairs with several others, while the remaining bases form a localized defective triangle. For visualization, the pairwise losses are sorted from largest to smallest, producing a compact spectrum of pairwise defects for each representative configuration.
+These diagnostics are used to analyse the pairwise defect geometry of each optimized configuration. A defective triangle refers to three bases for which the three pairwise relations among them remain defective. A hub-and-triangle configuration refers to a four-basis pattern in which one basis forms near-exact pairs with the other three, while the remaining three bases form a localized defective triangle. A fully defective observed configuration refers to a saved optimized configuration in which no pair is classified as near-exact under the primary tolerance.
+
+For visualization, the pairwise losses \(\ell_{ij}\) are sorted from largest to smallest, producing a compact spectrum of pairwise defects for each representative configuration. This spectrum records the distribution of edge weights in the complete graph of pairwise defects and provides a concise alternative to displaying every overlap matrix in the main text.
 
 \subsection{Representative Configurations}
 
-After the multi-seed campaigns, representative runs are selected for visualization. The representative selection is based on the saved run summaries and diagnostics rather than manual inspection of heatmaps.
-Within each structural category, the lowest-loss run is selected as the representative. If multiple runs have the same rounded loss, the smallest seed index is used as a deterministic tie-breaker.
+After the single-seed sweep and multi-seed campaigns, representative runs are selected for visualization from the saved summaries and diagnostics. The selection is based on recorded metadata and pairwise diagnostics rather than manual inspection of heatmaps. Within each structural category, the lowest-loss available run is selected as the representative. If multiple runs have the same rounded loss within the selection rule, the smallest seed index is used as a deterministic tie-breaker.
 
-The representative set includes, when present:
+The representative set includes, when available:
 \begin{itemize}
-    \item an exact or near-exact $n=3$ configuration;
-    \item a defective $n=3$ triangular configuration;
-    \item an $n=4$ hub-and-triangle configuration;
-    \item a best observed fully defective $n=5$ configuration;
-    \item a best observed $n=6$ low-loss configuration;
-    \item a recurrent $n=6$ basin when available.
+    \item a positive-control \(n=2\) configuration;
+    \item an exact or near-exact \(n=3\) configuration;
+    \item a structured \(n=4\) partial-exact hub-and-triangle configuration;
+    \item a best observed fully defective \(n=5\) configuration;
+    \item a best observed fully defective \(n=6\) configuration;
+    \item an exploratory \(n=7\) complete-target configuration from the single-seed sweep;
+    \item positive-control configurations in dimensions where complete MUB sets are known to exist, when included in the saved representative manifest.
 \end{itemize}
 
-These representatives are used to generate sorted pairwise-loss spectra and supporting heatmap visualizations. The representative-run manifest records the selected run directory, seed, dtype, best loss, number of near-exact pairs, and paths to the saved diagnostics and overlap matrices.
+These representatives are used to generate sorted pairwise-loss spectra and supporting heatmap visualizations. The representative-run manifest records the selected run identifier, seed, dtype when available, best loss, number of near-exact pairs, and paths to the saved pairwise diagnostics and overlap matrices. This makes the representative selection reproducible and links each plotted configuration to its saved artifacts.
 
 \subsection{Visualization and Figure Construction}
 
+The visualization stage is separated from the optimization stage. Figure-generation routines load saved overlap matrices, pairwise diagnostics, and campaign-level summaries from disk rather than recomputing optimized bases. This ensures that the numerical data used in the figures are the same saved artifacts used to construct the summary tables.
+
 The main paper uses compact visual summaries rather than full heatmap grids for every configuration. Three types of figures are generated from saved artifacts:
 \begin{enumerate}
-    \item loss summaries as a function of $n$ and dtype, with min--median--max ranges over seeds;
-    \item near-exact pair count summaries as a function of $n$ and dtype;
+    \item loss summaries as a function of \(n\) and dtype, with min--median--max ranges over seeds;
+    \item near-exact pair count summaries as a function of \(n\), dtype, and tolerance where applicable;
     \item sorted pairwise-loss spectra for representative configurations.
 \end{enumerate}
 
-Full pairwise heatmap grids are generated as supporting artifacts. These heatmaps visualize the matrices $|U_i^\dagger U_j|^2$ directly, but they become large as $n$ increases. For example, the complete-target case $n=7$ contains $\binom{7}{2}=21$ pairwise overlap matrices. For this reason, the main text emphasizes compact quantitative summaries and pairwise-loss spectra.
-For each plotted figure, the numerical data used to generate the figure are saved separately from the rendered image, allowing figures to be regenerated without rerunning optimization.
+Full pairwise heatmap grids are generated as supporting artifacts. These heatmaps visualize the matrices \(|U_i^\dagger U_j|^2\) directly. The number of pairwise overlap matrices grows as \(\binom{n}{2}\). For example, the complete-target case \(n=7\) contains
+\[
+\binom{7}{2}=21
+\]
+pairwise overlap matrices. For this reason, the main text emphasizes compact quantitative summaries and sorted pairwise-loss spectra, while full heatmaps are retained as supporting artifacts.
+
+For each plotted figure, the numerical data used to generate the figure are saved separately from the rendered image when available. This allows figures to be regenerated from saved summaries and diagnostics without rerunning the optimization.
 
 \subsection{Scope and Limitations of the Experiments}
 
-The experiments are numerical and do not constitute a proof of existence or nonexistence of complete MUB sets in dimension six. The optimizer is not guaranteed to find global minima, and the observed basins depend on initialization, precision, and optimizer settings.
+The experiments are numerical and do not constitute a proof of existence or nonexistence of complete MUB sets in dimension six. The optimizer is not guaranteed to find global minima, and the observed configurations depend on the chosen parameterization, optimizer, initialization scale, step schedule, numerical precision, backend pathway, seed set, and near-exact tolerance.
 
-The multi-seed campaigns reported here use 100 independent seeds per value of $n$ for $n=3,\ldots,6$. This large-scale sweep provides a robust statistical characterization of the full nonconvex landscape and its basins.
+The multi-seed campaigns reported here use 100 independent seeds for each \(n=3,\ldots,6\). These campaigns provide a reproducible empirical sample of the basins reached by the specified workflow. They should not be interpreted as a complete characterization of the full nonconvex optimization landscape.
 
-The complex128 results are used as the primary reference because they provide stable near-exact classifications and small unitarity residuals. The complex64 results are interpreted as a precision-sensitivity study. Differences between complex128 and complex64 are therefore treated as evidence of precision-dependent optimization behavior rather than as a ranking of one precision as universally superior.
+The \texttt{complex128} results are used as the primary reference for the structural analysis. The \texttt{complex64} results are interpreted as a precision-sensitivity study using the same CPU/native-matrix-exponential structural pathway. Differences between \texttt{complex128} and \texttt{complex64} are therefore treated as evidence of precision-dependent optimization behavior or tolerance-sensitive classification, not as a general ranking of one precision as universally superior.
 
-The reported landscape is also conditioned on the Lie-exponential parameterization and Adam optimizer; alternative manifold-optimization methods or parameterizations may sample different basins.
+The reported structural results are also conditioned on the unanchored Lie-exponential parameterization and Adam optimizer used in this workflow. Alternative parameterizations, manifold-optimization methods, learning-rate schedules, initialization distributions, or longer optimization budgets may sample different basins. The hardware benchmark results are likewise specific to the tested benchmark grid, dtype choices, step count, and backend policy; they are used to characterize the implemented workflow rather than to establish hardware-independent performance laws.
 
 \section{Results}
 \label{sec:results}
 
-This section reports the numerical results obtained from the unanchored AMUB workflow in dimension six. We first summarize the single-seed sweep over $n=2,\ldots,7$, then present the multi-seed complex128 campaign for $n=3,\ldots,6$, followed by the complex64 precision-sensitivity campaign. Finally, we interpret the pairwise defect spectra of representative configurations.
+This section reports the numerical results obtained from the unanchored AMUB workflow in dimension six. We first summarize the single-seed validation sweep over $n=2,\ldots,7$, then analyze the statistics of the multi-seed campaigns for $n=3,\ldots,6$ under both double-precision (\texttt{complex128}) and single-precision (\texttt{complex64}) arithmetic. Finally, we examine the pairwise defect geometry via sorted loss spectra and discuss the portability and performance characteristics of the hardware-acceleration layer.
 
-The results are numerical and should be interpreted as evidence about the optimization landscape explored by the workflow. They do not constitute a proof of existence or nonexistence of exact MUB configurations in dimension six.
+The results presented here are numerical and represent the landscape properties accessible to gradient-based optimization under our unanchored Lie-exponential parameterization. Consistent with standard mathematical caution, they do not constitute a formal proof of the existence or nonexistence of complete MUB sets in dimension six.
 
-\subsection{\texorpdfstring{Single-Seed Sweep over $n=2,\ldots,7$}{Single-Seed Sweep over n=2,...,7}}
+subsection{\texorpdfstring{Single-Seed Sweep over \(n=2,\ldots,7\)}{Single-Seed Sweep over n=2,...,7}}
 \label{subsec:single-seed-sweep}
 
-As an initial validation and exploratory study, we ran the complex128 reference workflow for $n=2,\ldots,7$ using a fixed seed. The results are summarized in Table~\ref{tab:single-seed-sweep}. This sweep verifies that the same parameterized workflow applies uniformly across the range from a single MUB pair to the complete-set target size $n=7$.
+As an initial validation and exploratory sweep, the workflow was executed for basis counts \(n=2,\ldots,7\) using the reference \texttt{complex128} configuration on the CPU with native \texttt{torch.matrix\_exp} and fixed validation seed \(s=1234\). The purpose of this sweep was to confirm that the same parameterized workflow runs across candidate basis counts from the positive-control two-basis case to the formal complete-set target \(n=d+1=7\) in dimension six. The results are summarized in Table~\ref{tab:single-seedSweep}.
 
-For $n=2$, the workflow recovered a mutually unbiased pair to numerical precision, with loss approximately $1.54\times 10^{-30}$. This provides a positive control for the loss function and the Lie-exponential parameterization. For $n=3$, the fixed-seed run reached a nonzero defective triangular configuration with total loss approximately $0.051249218996$ and no near-exact pairs. For $n=4$, the total loss was again approximately $0.051249218996$, but the pairwise structure differed: three pairs were near-exact and three pairs were defective. This equality of total loss between the fixed-seed $n=3$ and $n=4$ runs is explained by the pairwise decomposition: the $n=4$ configuration contains a defective triangular component together with three near-exact hub edges.
+For \(n=2\), the workflow recovered a mutually unbiased pair to numerical precision, with optimized loss approximately \(1.543\times 10^{-30}\). This case serves as a positive control for the loss function, Lie-exponential parameterization, and diagnostic pipeline. For \(n=3\), the fixed-seed run converged to a defective configuration with total loss approximately \(0.051249218996\) and no near-exact pairs under the primary tolerance \(\tau=10^{-6}\).
 
-For $n=5$, the fixed-seed run produced a fully defective configuration with no near-exact pairs and total loss approximately $0.359638850581$. The $n=6$ fixed-seed run reached a recurrent nonzero basin near $0.965932502216$, while the $n=7$ fixed-seed run produced a fully defective complete-target configuration with loss approximately $1.584472133131$. In both cases, every pairwise relation was defective under the primary near-exact tolerance.
+For \(n=4\), the fixed-seed run reached the same total loss scale, approximately \(0.051249218996\), but with a different pairwise structure: three of the six basis pairs were classified as near-exact, while the remaining three were defective. This configuration is therefore not an exact four-MUB configuration. Instead, it is a structured partial-exact configuration, consistent with the hub-and-triangle description used later: one basis forms near-exact pairs with three others, while the remaining three pairwise relations carry the residual defect.
+
+For \(n=5\), \(n=6\), and \(n=7\), the fixed-seed runs produced configurations with no near-exact pairs under the primary tolerance. The corresponding losses were approximately \(0.359638494882\), \(0.965932502216\), and \(1.584472133131\), respectively. These single-seed outcomes indicate a progression from a positive-control exact pair, through defective or partial-exact configurations at \(n=3,4\), to fully defective observed configurations for \(n\geq 5\) in this validation sweep. Because this sweep uses only one seed per value of \(n\), it is used only as an exploratory validation step; statistical conclusions are deferred to the multi-seed campaigns.
+
 
 \begin{table*}[t]
-  \caption{Single-seed complex128 sweep over $n=2,\ldots,7$ in dimension six. Near-exact pairs are counted using the tolerance $10^{-6}$.}
-  \label{tab:single-seed-sweep}
+  \caption{Single-seed complex128 sweep over $n=2,\ldots,7$ in dimension six. Near-exact pairs are counted using the tolerance $\tau = 10^{-6}$.}
+  \label{tab:single-seedSweep}
   \begin{tabular}{ccccc}
     \toprule
     $n$ & Number of pairs & Best loss & Near-exact pairs & Defective pairs \\
@@ -627,30 +698,35 @@ For $n=5$, the fixed-seed run produced a fully defective configuration with no n
     2 & 1  & $1.543\times 10^{-30}$ & 1 & 0 \\
     3 & 3  & $0.051249218996$ & 0 & 3 \\
     4 & 6  & $0.051249218996$ & 3 & 3 \\
-    5 & 10 & $0.359638850581$ & 0 & 10 \\
+    5 & 10 & $0.359638494882$ & 0 & 10 \\
     6 & 15 & $0.965932502216$ & 0 & 15 \\
     7 & 21 & $1.584472133131$ & 0 & 21 \\
     \bottomrule
   \end{tabular}
 \end{table*}
+The single-seed sweep confirms that the workflow produces saved artifacts and diagnostics across the full candidate-basis range \(n=2,\ldots,7\). However, a single optimization trajectory can be initialization-dependent. We therefore proceed to 100-seed campaigns for \(n=3,\ldots,6\), where initialization sensitivity and recurrent basin structure can be assessed more systematically.
 
-The single-seed sweep suggests a progression from exact behavior at $n=2$, through partially exact or structured defective configurations at $n=3$ and $n=4$, to fully defective configurations for $n\geq 5$. The following multi-seed campaigns test which of these features persist across random initialization.
-
-\subsection{Multi-Seed complex128 Campaign}
+\subsection{\texorpdfstring{Multi-Seed \texttt{complex128} Campaign}{Multi-Seed complex128 Campaign}}
 \label{subsec:complex128-campaign}
 
-The complex128 campaign used 100 independent seeds for each $n=3,4,5,6$. Table~\ref{tab:complex128-multiseed} summarizes the loss statistics and near-exact pair counts observed in the campaign.
+To examine initialization sensitivity in the reference precision, we performed a 100-seed \texttt{complex128} campaign for each basis count
+\[
+n \in \{3,4,5,6\},
+\qquad
+s \in \{0,1,\ldots,99\}.
+\]
+All runs in this structural campaign used the CPU backend with native \texttt{torch.matrix\_exp}. The aggregated loss statistics and near-exact pair counts under the primary tolerance \(\tau=10^{-6}\) are summarized in Table~\ref{tab:complex128-multiseed}.
 
-For $n=3$, the workflow reached both exact and defective basins. A majority of seeds produced configurations with three near-exact pairs and loss numerically indistinguishable from zero at the reported scale (with median loss $\sim 10^{-29}$). However, some seeds produced fully defective configurations, including the defective triangular basin near $0.051249218996$ and another defective basin near $0.065592$. Thus, even when exact triples are reachable by the workflow, the unanchored nonconvex landscape contains competing defective attractors.
+For \(n=3\), the campaign shows both exact and defective outcomes. The minimum and median losses are at numerical zero on the displayed scale, with median loss approximately \(1.01\times 10^{-29}\), and the median near-exact pair count is three. Thus, typical runs in the campaign recover exact MUB triples. However, the maximum loss is \(0.134080\), and the minimum near-exact count is zero, showing that some seeds converge to defective local basins. This confirms that even in the three-basis case, the unanchored objective samples multiple basins under the fixed optimization protocol.
 
-For $n=4$, a significant fraction of seeds converged to the same low-loss basin near $0.051249218996$, with three near-exact pairs and three defective pairs. This is the hub-and-triangle structure identified in the single-seed analysis. The remaining seeds reached higher-loss fully defective basins. The repeated recovery of the $0.051249218996$ basin suggests that the hub-and-triangle configuration is a prominent attractor in the complex128 workflow.
+For \(n=4\), the minimum and median best losses are both approximately \(0.051249218996\), and the median near-exact pair count is three. Since a four-basis MUB configuration would require all \(\binom{4}{2}=6\) pairs to be near-exact, these runs do not represent exact four-MUB configurations. Instead, the median behavior is a structured partial-exact configuration with three near-exact pairs and three defective pairs. The maximum loss \(0.294147\) and minimum near-exact count zero indicate that higher-loss fully defective basins are also sampled by some seeds.
 
-For $n=5$, all 100 seeds produced fully defective configurations with no near-exact pairs. The best loss observed was approximately $0.359637$, while the median and maximum best losses were approximately $0.439033$ and $0.689537$, respectively. Most importantly, no near-exact pair was observed in any of the 100 runs.
+For \(n=5\), no near-exact pairs were observed in any of the 100 \texttt{complex128} runs under the primary tolerance. The best loss was \(0.359637\), the median best loss was \(0.439033\), and the maximum best loss was \(0.689537\). Thus, every saved \(n=5\) configuration in this campaign is fully defective under the stated tolerance.
 
-For $n=6$, all 100 seeds were also fully defective. The campaign sampled multiple nonzero basins, including losses near $0.868532$, $0.965933$, and higher. The best observed complex128 loss in this campaign was $0.868532$, and the median best loss was also $0.868532$. These results strongly support the empirical evidence that the six-basis landscape sampled by the present unanchored workflow is fully defective under the primary near-exact tolerance.
+For \(n=6\), the same qualitative pattern is observed. The near-exact count is zero for every seed under the primary tolerance, with minimum and median losses both approximately \(0.868532\) and maximum loss \(1.404517\). These results indicate that, within the specified unanchored Lie-exponential workflow and optimization budget, the sampled \(n=5\) and \(n=6\) configurations contain no near-exact MUB pairs.
 
 \begin{table*}[t]
-  \caption{Multi-seed complex128 campaign for $n=3,\ldots,6$. The near-exact counts list the min/median/max number of near-exact pairs observed across 100 random seeds, using tolerance $10^{-6}$.}
+  \caption{Multi-seed \texttt{complex128} campaign for $n=3,\ldots,6$. The near-exact counts list the min/median/max number of near-exact pairs observed across 100 random seeds, using the primary tolerance $\tau = 10^{-6}$.}
   \label{tab:complex128-multiseed}
   \begin{tabular}{cccc}
     \toprule
@@ -663,24 +739,21 @@ For $n=6$, all 100 seeds were also fully defective. The campaign sampled multipl
     \bottomrule
   \end{tabular}
 \end{table*}
+Overall, the \texttt{complex128} campaign shows a clear empirical progression under the reported workflow: exact triples are recovered for many \(n=3\) seeds, \(n=4\) is dominated by a partial-exact three-edge structure rather than an exact four-MUB configuration, and no near-exact pairs are observed for \(n=5\) or \(n=6\) under the primary tolerance.
 
-The complex128 campaign supports a transition from exact or partially exact configurations for $n=3$ and $n=4$ to fully defective configurations for $n=5$ and $n=6$. In this sense, the observed transition begins at $n=5$ in the present workflow.
-
-\subsection{Precision Sensitivity: complex128 versus complex64}
+\subsection{\texorpdfstring{Precision Sensitivity: \texttt{complex128} versus \texttt{complex64}}{Precision Sensitivity: complex128 versus complex64}}
 \label{subsec:precision-sensitivity}
 
-We repeated the multi-seed campaign for $n=3,4,5,6$ using complex64 arithmetic with 100 independent random seeds. Table~\ref{tab:precision-comparison} compares the complex128 and complex64 summaries. As described in Section~\ref{sec:experimental-methodology}, these structural precision comparisons use the CPU matrix-exponential pathway rather than the Taylor GPU backend.
+To investigate the role of floating-point precision, we repeated the 100-seed campaigns using \texttt{complex64} arithmetic. The precision-comparison campaigns use the same values of \(n\), the same seed set, the same optimizer settings, and the same CPU/native-\texttt{matrix\_exp} structural pathway as the \texttt{complex128} reference campaign. This isolates floating-point precision effects from accelerator-specific Taylor-exponential effects. Table~\ref{tab:precision-comparison} compares the two precisions.
 
-For $n=3$, both precisions found exact and defective basins. In the complex64 campaign, a majority of seeds reached exact or near-exact triples, while others reached the defective triangular basin. Thus, the coexistence of exact and defective basins is observed in both precisions.
+The comparison shows that the qualitative disappearance of near-exact pairs for \(n=5\) and \(n=6\) is stable across the two precisions. For both \texttt{complex128} and \texttt{complex64}, the near-exact min/median/max counts are \(0/0/0\) for \(n=5\) and \(n=6\). The loss statistics are also similar at the minimum and median levels, although the maximum losses differ between precisions.
 
-For $n=4$, the complex64 campaign found low-loss configurations near $0.051249$, but the near-exact classification was more sensitive to tolerance than in complex128. Under the primary tolerance $10^{-6}$, the median near-exact count for complex64 was $0$, while the maximum was $3$. A subsequent tolerance check showed that some complex64 $n=4$ runs recover three near-exact pairs only under relaxed tolerances such as $10^{-5}$ or $10^{-4}$. By contrast, the complex128 $n=4$ hub-and-triangle classifications were stable under the tolerances examined.
+For \(n=3\), both precisions recover exact or near-exact triples in the median case. The \texttt{complex128} campaign has median loss \(1.01\times 10^{-29}\), while the \texttt{complex64} campaign has median loss \(7.19\times 10^{-13}\). Both have median near-exact count three, and both have minimum near-exact count zero, indicating that defective seeds occur in both precision settings.
 
-For $n=5$, both precisions produced fully defective configurations in all 100 seeds. This is the strongest precision-stable transition result: no near-exact pairs were observed for $n=5$ under either complex128 or complex64, even when relaxed near-exact tolerances were examined.
-
-For $n=6$, both precisions produced fully defective configurations. However, the observed basin sampling differed. Reduced precision can affect basin selection and attractor stability in the nonconvex AMUB landscape, while preserving the qualitative fully defective structure for $n=6$.
+For \(n=4\), the precision dependence is more visible in the near-exact classification. Both precisions reach the same loss scale near \(0.051249\) at the minimum and median. However, the median near-exact count is three in \texttt{complex128} and zero in \texttt{complex64}, while the maximum near-exact count in \texttt{complex64} is still three. This indicates that reduced precision affects either the basin reached, the tolerance-level classification of near-exact edges, or both. The recorded pairwise losses and maximum deviations are therefore used in later analysis to distinguish underlying defect structure from tolerance-sensitive classification.
 
 \begin{table*}[t]
-  \caption{Precision comparison for multi-seed AMUB campaigns in dimension six. Near-exact min/med/max use the primary tolerance $10^{-6}$ across 100 independent seeds.}
+  \caption{Precision comparison for multi-seed AMUB campaigns in dimension six. Near-exact min/med/max use the primary tolerance $\tau = 10^{-6}$ across 100 independent seeds.}
   \label{tab:precision-comparison}
   \begin{tabular}{ccccc}
     \toprule
@@ -697,111 +770,124 @@ For $n=6$, both precisions produced fully defective configurations. However, the
     \bottomrule
   \end{tabular}
 \end{table*}
-
-The precision comparison suggests that the qualitative transition from partial exactness to fully defective configurations is stable across complex128 and complex64. At the same time, the detailed basin frequencies and some near-exact classifications are precision-sensitive.
+Thus, the precision comparison supports two conclusions. First, the absence of near-exact pairs in the observed \(n=5\) and \(n=6\) configurations is stable across \texttt{complex128} and \texttt{complex64} under the primary tolerance. Second, the detailed near-exact classification for \(n=4\) is precision-sensitive, even though the median loss scale remains essentially unchanged.
 
 \subsection{Tolerance Sensitivity of Near-Exact Classification}
 \label{subsec:tolerance-sensitivity}
 
-Near-exact pair classification depends on a numerical threshold. The primary threshold used in the summary tables is $10^{-6}$, but additional checks were performed at $10^{-5}$ and $10^{-4}$.
+The classification of a pair as near-exact depends on the numerical threshold \(\tau\). For this reason, near-exact pair counts are evaluated not only at the primary tolerance
+\[
+\tau = 10^{-6},
+\]
+but also at relaxed tolerances
+\[
+10^{-5}
+\quad\text{and}\quad
+10^{-4}.
+\]
+This tolerance sweep is used to distinguish changes in the recorded pairwise defects from changes caused by the classification threshold.
 
-For the complex128 campaign, the near-exact counts were unchanged across these tolerances. Exact or near-exact configurations remained classified as such, and fully defective configurations for $n=5$ and $n=6$ remained fully defective.
+For the \texttt{complex128} reference campaign, the near-exact classifications are stable across the examined tolerance range in the reported summaries. In particular, exact or near-exact pairs remain classified as such, while the fully defective observed configurations for \(n=5\) and \(n=6\) remain without near-exact pairs under the examined tolerances.
 
-For the complex64 campaign, the main tolerance sensitivity occurred at $n=4$. Some runs classified as having zero near-exact pairs under $10^{-6}$ exhibited three near-exact pairs under $10^{-5}$ or $10^{-4}$. This indicates that reduced precision can affect the numerical classification of near-exact hub edges. However, the $n=5$ and $n=6$ complex64 runs remained fully defective under all examined tolerances. 
-Therefore, within the examined tolerance range, the observed disappearance of near-exact pairs for $n\geq 5$ is not an artifact of the strict $10^{-6}$ threshold in the present experiments.
+For the \texttt{complex64} campaign, the main tolerance sensitivity occurs at \(n=4\). Under the primary tolerance \(\tau=10^{-6}\), the median near-exact pair count for \(n=4\) is zero, while the maximum is three. This indicates that some \texttt{complex64} runs still reach configurations with three near-exact pairs, but the classification is less stable than in the \texttt{complex128} reference campaign. When relaxed tolerances are applied, some \(n=4\) \texttt{complex64} configurations recover the three near-exact hub edges.
+
+By contrast, the \(n=5\) and \(n=6\) campaigns remain fully defective in the reported tolerance checks: no near-exact pairs are observed under the primary tolerance, and the tolerance sweep is used to verify that this conclusion is not solely an artifact of choosing \(\tau=10^{-6}\). These observations should be interpreted within the fixed workflow, optimizer, seed set, precision policy, and tolerance range used in this study.
 
 \subsection{Pairwise Defect Spectra}
 \label{subsec:pairwise-defect-spectra}
 
-The pairwise defect spectra provide a compact visualization of the structure hidden behind the scalar loss values. Each spectrum consists of the sorted pairwise losses $\ell_{ij}$ for a representative optimized configuration.
-The sorted pairwise-loss spectra for representative complex128 and complex64 configurations are shown in Appendix Figures~\ref{fig:pairwise-loss-spectra-complex128} and~\ref{fig:pairwise-loss-spectra-complex64}, respectively.
+The pairwise defect spectra represent the sorted individual pairwise losses \(\ell_{ij}\) for selected representative configurations. They provide a compact structural summary of how the total AMUB defect is distributed across basis pairs. The sorted spectra for representative configurations are shown in Appendix Figures~\ref{fig:pairwise-loss-spectra-complex128} and~\ref{fig:pairwise-loss-spectra-complex64}, where available.
 
-The $n=3$ exact representative has all pairwise losses at numerical zero. The $n=3$ defective representative has three approximately equal nonzero pairwise losses, forming a symmetric defective triangle. 
+For the exact or near-exact \(n=3\) representative, all three pairwise losses are at numerical zero on the plotted scale. This is consistent with the multi-seed summaries, where the median near-exact count for \(n=3\) is three in both \texttt{complex128} and \texttt{complex64} campaigns.
 
-The $n=4$ hub-and-triangle representative has three near-zero pairwise losses and three approximately equal defective losses. This supports the interpretation that the $n=4$ low-loss basin consists of a defective three-basis core together with a near-exact hub basis.
+For the \(n=4\) representative, the spectrum contains three near-zero losses and three nonzero losses. This supports the interpretation of the low-loss \(n=4\) basin as a structured partial-exact configuration rather than an exact four-MUB configuration. In graph terms, one basis acts as a hub forming near-exact pairs with the other three bases, while the remaining three pairwise relations form a defective triangle.
 
 \graphicspath{{figures/}}
 \begin{figure}[ht]
   \centering
   \includegraphics[width=1.0\linewidth]{n4_hub_and_triangle_d6_n4_seed3}
-  \caption{Representative pairwise-loss heatmap for $d=6, n=4$. The heatmap shows a hub-and-triangle structure with three near-zero losses and three nonzero losses.}
-  \Description{Heatmap of the pairwise losses for the $n=4$ hub-and-triangle representative configuration. Three pairs have near-zero loss, while three pairs have approximately equal nonzero loss, consistent with a hub-and-triangle structure.}
+  \caption{Representative pairwise-loss heatmap for \(d=6\), \(n=4\). The heatmap shows a partial-exact hub-and-triangle structure with three near-zero losses and three nonzero losses.}
+  \Description{Heatmap of the pairwise losses for the \(n=4\) representative configuration. Three pairs have near-zero loss, while three pairs have nonzero loss, consistent with a hub-and-triangle pairwise defect structure.}
   \label{fig:heatmap-d6-n4}
 \end{figure}
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=1.0\linewidth]{n5_best_fully_defective_d6_n5_seed0}
-  \caption{Representative pairwise-loss heatmap for $d=6, n=5$. The heatmap shows a fully defective structure with all pairs having nonzero loss.}
-  \Description{Heatmap of the pairwise losses for the $n=5$ fully defective representative configuration. All pairs have nonzero loss, indicating a globally defective structure.}
+  \caption{Representative pairwise-loss heatmap for \(d=6\), \(n=5\). The heatmap shows a fully defective observed configuration in which all pairwise losses are nonzero under the primary tolerance.}
+  \Description{Heatmap of the pairwise losses for the \(n=5\) representative configuration. All basis pairs have nonzero loss, indicating that no pair is classified as near-exact under the primary tolerance.}
   \label{fig:heatmap-d6-n5}
 \end{figure}
 
-For $n=5$, all ten pairwise losses are nonzero in the representative best configuration. The spectrum is not uniform: one pair carries substantially more defect than the others in the selected representative. This indicates that the transition at $n=5$ is not merely a uniform spreading of the $n=4$ defect, but a reorganization into a fully defective configuration.
+For \(n=5\), all ten pairwise losses are nonzero in the selected representative configuration. Thus, the representative \(n=5\) configuration is fully defective under the primary near-exact tolerance. The sorted spectrum shows how the residual defect is distributed across all ten basis pairs rather than localized solely in a small defective subgraph.
 
-For $n=6$, the representative low-loss basin has all fifteen pairwise losses nonzero, with repeated loss levels. This is consistent with a globally defective but structured configuration, in which no pair is near-exact under the primary tolerance. The sorted spectra therefore support the interpretation that increasing $n$ changes the optimized configurations from exact or partially exact pairwise relations to globally distributed defect.
+For \(n=6\), the selected representative configuration has all fifteen pairwise losses nonzero under the primary tolerance. The corresponding sorted spectrum therefore describes a fully defective observed configuration. The pairwise defect spectrum is useful here because it records not only the absence of near-exact pairs, but also the distribution of defect magnitudes across all basis pairs.
 
+Together, the pairwise spectra support the interpretation suggested by the aggregate summaries: the workflow recovers exact or near-exact triples, finds structured partial-exact four-basis configurations, and samples fully defective observed configurations for \(n=5\) and \(n=6\) under the stated optimization protocol.
 
 \subsection{Hardware Benchmarks and GPU Acceleration Performance}
 \label{subsec:hardware-benchmarks}
 
-To evaluate the portable hardware-acceleration layer described in Section~\ref{sec:software-workflow}, we performed benchmark experiments on an Apple Silicon MacBook Pro (M1 processor) running PyTorch 2.4. We measured the average execution time (in seconds) required to perform $1000$ optimization iterations for the case $n=6$ bases, comparing CPU execution under reference \texttt{complex128} and baseline \texttt{complex64} precisions against the custom Taylor-series matrix exponential running natively on the Apple Silicon GPU via the \texttt{mps} backend. The results are summarized in Table~\ref{tab:hardware-benchmarks}.
+To evaluate backend portability and scaling, we benchmarked the workflow on increasing matrix dimensions. The benchmark uses \(n=6\) candidate bases and measures the wall-clock time required to complete \(1000\) Adam optimization steps for
+\[
+d \in \{6,12,24,48,96\}.
+\]
+These timing experiments are separate from the structural AMUB campaigns. The structural campaigns use the CPU/native-\texttt{matrix\_exp} pathway, while the accelerator benchmarks use the Taylor-series compatibility pathway where applicable.
 
+Table~\ref{tab:hardware-benchmarks} reports the workstation benchmark comparing CPU execution against Apple M1 GPU execution through the \texttt{mps} backend. The GPU column uses the order-\(20\) Taylor matrix-exponential pathway.
 \begin{table*}[ht]
-  \caption{Multi-dimensional hardware benchmark and iteration speed comparison (in seconds) per $1000$ optimization steps ($n=6$ bases) across dimensions $d=6, 12, 24, 48, 96$ on CPU vs. Apple M1 GPU (MPS). Order-$20$ Taylor expansion is utilized for the GPU backend.}
+  \caption{Workstation hardware benchmark in seconds per \(1000\) optimization steps for \(n=6\) bases across dimensions \(d=6,12,24,48,96\). The GPU backend uses the order-\(20\) Taylor matrix-exponential pathway. Relative GPU speed is computed as CPU \texttt{complex128} time divided by MPS GPU time; values above \(1\) indicate GPU speedup relative to the CPU \texttt{complex128} baseline.}
   \label{tab:hardware-benchmarks}
   \begin{tabular}{ccccc}
     \toprule
-    Dimension $d$ & CPU \texttt{c128} (s) & CPU \texttt{c64} (s) & M1 GPU MPS (s) & Relative GPU Speed \\
+    Dimension \(d\) & CPU \texttt{c128} (s) & CPU \texttt{c64} (s) & M1 GPU MPS (s) & Relative GPU Speed \\
     \midrule
-    6  & 2.617  & 2.695  & 42.958 & $0.06\times$ \\
-    12 & 3.367  & 3.099  & 44.105 & $0.08\times$ \\
-    24 & 4.547  & 4.032  & 43.345 & $0.10\times$ \\
-    48 & 13.077 & 9.782  & 45.735 & $0.29\times$ \\
-    96 & 62.281 & 37.244 & 48.384 & $1.29\times$ \\
+    6  & 2.617  & 2.695  & 42.958 & \(0.06\times\) \\
+    12 & 3.367  & 3.099  & 44.105 & \(0.08\times\) \\
+    24 & 4.547  & 4.032  & 43.345 & \(0.10\times\) \\
+    48 & 13.077 & 9.782  & 45.735 & \(0.29\times\) \\
+    96 & 62.281 & 37.244 & 48.384 & \(1.29\times\) \\
     \bottomrule
   \end{tabular}
 \end{table*}
-\noindent Relative GPU speed is computed as CPU complex128 time divided by MPS GPU time; values above $1$ indicate GPU speedup relative to the double-precision CPU baseline.
 
+On the workstation benchmark grid, MPS execution is slower than CPU execution for \(d=6,12,24,48\). At \(d=96\), the MPS timing is lower than the CPU \texttt{complex128} timing, giving a relative speed of \(1.29\times\). Therefore, on this tested grid, the workstation crossover occurs between \(d=48\) and \(d=96\). The benchmark does not determine a more precise crossover dimension without additional intermediate dimension points.
 
-The benchmark results in Table~\ref{tab:hardware-benchmarks} show a hardware crossover behavior typical of accelerator-backed dense linear algebra. For small dimensions, the Apple M1 GPU backend is substantially slower than the CPU baselines. At $d=6$, the arithmetic workload is too small to amortize accelerator overheads, and the CPU completes $1000$ iterations in under three seconds, while the MPS backend requires approximately $43$ seconds.
-
-As $d$ increases, the CPU timings grow rapidly, reflecting the increasing cost of dense matrix products and matrix exponentiation. By contrast, the measured MPS timings remain in the range of approximately $43$--$48$ seconds across the tested dimensions. This nearly constant GPU timing is consistent with fixed accelerator-launch overheads dominating the small- and medium-dimensional workloads.
-
-At $d=96$, the MPS Taylor backend completes $1000$ iterations in $48.384$ seconds, compared with $62.281$ seconds for the CPU complex128 reference timing. Thus, the measured timings show a crossover between $d=48$ and $d=96$ relative to the double-precision CPU baseline. Interpolating these timings suggests a crossover near $d\approx 80$. The MPS backend remains slower than the CPU complex64 timing in this benchmark, so the observed speedup should be interpreted specifically relative to the complex128 CPU reference.
-
-These results indicate that the Taylor-series layer enables portable accelerator execution and can become favorable at larger dimensions, while preserving a CPU-native reference pathway for the structural AMUB experiments reported above.
-
-To evaluate the scalability of the approach on enterprise-grade hardware, we additionally performed benchmark experiments on the JANUS high-performance computing cluster, which features AMD EPYC 7352 CPUs and NVIDIA A100 GPUs. As shown in Table~\ref{tab:hardware-benchmarks-janus}, the CPU baseline times grow significantly with dimension, while the NVIDIA A100 GPU maintains a nearly constant timing of approximately $26$--$28$ seconds across all dimensions up to $d=96$. The hardware crossover occurs earlier on the JANUS cluster, overtaking the double-precision CPU baseline between $d=24$ and $d=48$, and overtaking the single-precision CPU baseline at $d=96$. 
-
-Comparing the two systems, the crossover occurs much sooner on the enterprise platform ($d \approx 30$) than on the consumer workstation ($d \approx 80$). This is explained by the A100's massive parallel processing capacity, which allows it to handle the larger matrix arithmetic workload of higher dimensions with negligible timing increase (growing by only 1.2 seconds from $d=6$ to $d=96$). While both devices exhibit similar flat execution curves dominated by initial API and kernel launch overheads (around 43--45 seconds on the M1 MPS and 26--28 seconds on the A100 CUDA), the significantly higher compute power of the A100 allows it to achieve a speedup relative to the CPU reference at a much lower dimensionality. This confirms that the Taylor-series matrix exponential fallback delivers substantial acceleration for moderate-to-large tensor dimensions on high-performance accelerators.
+To test the same workflow on an HPC-style accelerator backend, we ran the benchmark on the JANUS CUDA backend. The results are summarized in Table~\ref{tab:hardware-benchmarks-janus}. The table reports both \texttt{complex128} and \texttt{complex64} CPU and GPU timings from the saved benchmark summary.
 
 \begin{table*}[ht]
-  \caption{Multi-dimensional hardware benchmark and iteration speed comparison (in seconds) per $1000$ optimization steps ($n=6$ bases) across dimensions $d=6, 12, 24, 48, 96$ on the JANUS HPC cluster (AMD EPYC 7352 CPU vs. NVIDIA A100 GPU). Order-$20$ Taylor expansion is utilized for the GPU backend.}
+  \caption{JANUS CUDA benchmark in seconds per \(1000\) optimization steps for \(n=6\) bases across dimensions \(d=6,12,24,48,96\). GPU timings use the accelerator matrix-exponential pathway. Speedups are computed as CPU time divided by GPU time for the same dtype; values above \(1\) indicate GPU speedup.}
   \label{tab:hardware-benchmarks-janus}
-  \begin{tabular}{ccccc}
+  \begin{tabular}{cccccc}
     \toprule
-    Dimension $d$ & CPU \texttt{c128} (s) & CPU \texttt{c64} (s) & A100 GPU (s) & Relative GPU Speed \\
+    Dimension \(d\) &
+    CPU \texttt{c128} (s) &
+    GPU \texttt{c128} (s) &
+    Speedup \texttt{c128} &
+    CPU \texttt{c64} (s) &
+    GPU \texttt{c64} (s) \\
     \midrule
-    6  & 7.270 & 7.649 & 26.495 & $0.27\times$ \\
-    12 & 10.314 & 10.870 & 27.317 & $0.38\times$ \\
-    24 & 22.282 & 15.492 & 27.453 & $0.81\times$ \\
-    48 & 31.449 & 22.983 & 27.578 & $1.14\times$ \\
-    96 & 72.810 & 55.595 & 27.705 & $2.63\times$ \\
+    6  & 7.270  & 26.495 & \(0.27\times\) & 7.649  & 26.504 \\
+    12 & 10.314 & 27.317 & \(0.38\times\) & 10.870 & 26.522 \\
+    24 & 22.282 & 27.453 & \(0.81\times\) & 15.492 & 27.015 \\
+    48 & 31.449 & 27.578 & \(1.14\times\) & 22.983 & 27.066 \\
+    96 & 72.810 & 27.705 & \(2.63\times\) & 55.595 & 27.054 \\
     \bottomrule
   \end{tabular}
 \end{table*}
-\noindent Relative GPU speed is computed as CPU complex128 time divided by GPU complex128 time.
 
+On the JANUS CUDA benchmark grid, the GPU timing is nearly flat across the tested dimensions, while CPU timing increases with dimension. For \texttt{complex128}, the GPU becomes faster than the CPU between \(d=24\) and \(d=48\). At \(d=96\), the \texttt{complex128} GPU timing is \(27.705\) seconds compared with \(72.810\) seconds on CPU, corresponding to a \(2.63\times\) speedup.
+
+For \texttt{complex64}, the GPU remains slower than CPU at \(d=48\) but is faster at \(d=96\). Thus, on the tested grid, the \texttt{complex64} crossover occurs between \(d=48\) and \(d=96\). At \(d=96\), the \texttt{complex64} GPU timing is \(27.054\) seconds compared with \(55.595\) seconds on CPU, corresponding to approximately a \(2.05\times\) speedup.
+
+These hardware benchmarks show that accelerator execution is not advantageous for small dimensions in this workflow, but becomes beneficial at larger tested dimensions when the dense linear-algebra workload is large enough to offset fixed accelerator overheads. The benchmark results characterize the performance of the implemented workflow on the tested hardware and dimension grid. They are not used to support the structural AMUB conclusions, which are based on the CPU/native reference pathway.
 
 \graphicspath{{figures/}}
-
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=1.0\linewidth]{loss_summary_by_n_precision}
-  \caption{Best AMUB loss summary in $d=6$. This plot shows the median best loss with min--max range across 100 seeds. The AMUB loss increases with $n$.}
+  \caption{Best AMUB loss summary in \(d=6\). The plot shows median best loss with min--max range across 100 seeds for \texttt{complex128} and \texttt{complex64}.}
   \Description{A line plot with error bars comparing AMUB best loss values for complex128 and complex64 across n equals 3, 4, 5, and 6.}
   \label{fig:loss-summary-by-n-precision1}
 \end{figure}
@@ -809,7 +895,7 @@ Comparing the two systems, the crossover occurs much sooner on the enterprise pl
 \begin{figure}[t]
   \centering
   \includegraphics[width=1.0\linewidth]{near_exact_pair_summary_by_n_precision}
-  \caption{Near-exact MUB pair counts in $d=6$. This plot shows the median number of near-exact MUB pairs with corresponding ranges across 100 seeds. Near-exact pairs disappear for $n \ge 5$ under the primary tolerance, coinciding with a transition to fully defective observed configurations.}
+  \caption{Near-exact MUB pair counts in \(d=6\). The plot shows the median number of near-exact pairs with min--max ranges across 100 seeds. Under the primary tolerance, no near-exact pairs are observed for \(n=5\) or \(n=6\) in either precision.}
   \Description{A line plot with error bars showing the number of near-exact MUB pairs for complex128 and complex64 across n equals 3, 4, 5, and 6.}
   \label{fig:near-exact-pair-summary1}
 \end{figure}
