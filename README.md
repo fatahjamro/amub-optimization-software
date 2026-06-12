@@ -54,21 +54,30 @@ To run a fast, end-to-end campaign and instantly verify the figures:
 ```
 
 ### 3. Run the Full Campaign Reproduction
-To execute the complete double and single precision multi-seed optimization campaigns (sweeping bases $n = 3, \ldots, 6$ and random seeds $0, \ldots, 4$), run:
+To execute the complete double and single precision multi-seed optimization campaigns (sweeping bases $n = 3, \ldots, 6$ and random seeds $0, \ldots, 99$), run:
 ```bash
 ./reproduce.sh
 ```
 
 ### 4. Run the Hardware Benchmarks
-To reproduce Table 3 (the performance crossover scaling CPU vs GPU) across matrix dimensions $d = 6, 12, 24, 48, 96$, execute:
+To reproduce the performance crossover scaling (CPU vs GPU) across matrix dimensions $d = 6, 12, 24, 48, 96$, execute:
 ```bash
 python3 scripts/run_hardware_benchmarks.py
 ```
 This script automatically utilizes our custom Taylor matrix exponentiation fallback on active GPU devices (`mps` or `cuda`) and falls back gracefully to CPU if no accelerator is present.
 
 ### 🖥️ 5. Run on High-Performance Computing (HPC) Clusters
-To run a large-scale, high-throughput campaign (e.g. 100 seeds) on a SLURM-managed HPC cluster like ATU's JANUS facility, submit the provided batch script:
-```bash
-sbatch scripts/submit_janus.sh
-```
-This script allocates compute resources, activates the environment, runs the 100-seed campaign using `configs/multiseed_janus_100.yaml`, and automatically compiles the summaries.
+To run the large-scale campaigns (100 seeds) and benchmark runs on a SLURM-managed HPC cluster like ATU's JANUS facility, submit the provided batch scripts:
+*   **Double-Precision Sweep (100 seeds):**
+    ```bash
+    sbatch scripts/submit_janus_100_array.sh
+    ```
+*   **Single-Precision Sweep (100 seeds):**
+    ```bash
+    sbatch scripts/submit_janus_64_array.sh
+    ```
+*   **Hardware Benchmark:**
+    ```bash
+    sbatch scripts/submit_janus_benchmark.sh
+    ```
+These scripts automate resource allocation, environment activation, multi-seed campaigns, and timing runs on the cluster, outputting logs and results directly to the `results/` folder.
