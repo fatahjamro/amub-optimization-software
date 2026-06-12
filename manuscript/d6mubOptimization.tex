@@ -108,7 +108,8 @@ The workflow produces aggregate summaries and representative-run manifests for v
 \section{Mathematical Formulation}
 \label{sec:mathematical-formulation}
 
-This section defines the approximate mutually unbiased basis problem studied in this paper. We work throughout in dimension $d=6$ and consider collections of $n$ candidate orthonormal bases in the complex Hilbert space $\mathbb{C}^6$~\cite{helmberg2008introHilbertspace}. Each basis is represented by a unitary matrix~\cite{littlewood1977theoryofgroupandmatrix} $U_k \in U(6)$, whose columns are the basis vectors.
+This section defines the approximate mutually unbiased basis problem studied in this paper. The main numerical case study is carried out in dimension \(d=6\). We therefore consider collections of \(n\) candidate orthonormal bases in the complex Hilbert space \(\mathbb{C}^6\)~\cite{helmberg2008introHilbertspace}. Each basis is represented by a unitary matrix~\cite{littlewood1977theoryofgroupandmatrix} \(U_k \in U(6)\), whose columns are the basis vectors. The formulation below is written explicitly for \(d=6\), while the software implementation is parameterized by the dimension.
+
 
 \subsection{Mutual Unbiasedness}
 
@@ -119,13 +120,14 @@ Let $B_i=\{u_{i,1},\ldots,u_{i,6}\}$ and $B_j=\{u_{j,1},\ldots,u_{j,6}\}$ be two
     1 \leq a,b \leq 6.
     \label{eq:mub-condition-vector}
 \end{equation}
+Thus, measurement of a state prepared in one basis gives a uniform probability distribution when expressed in the other basis.
 
-Equivalently, if the bases are represented by unitary matrices $U_i$ and $U_j$, the cross-Gram matrix $U_i^\dagger U_j$ satisfies
+Equivalently, if the bases are represented by unitary matrices $U_i$ and $U_j$, with columns given by the corresponding basis vectors, then the cross-Gram matrix $U_i^\dagger U_j$ satisfies
 \begin{equation}
     |(U_i^\dagger U_j)_{ab}|^2 = \frac{1}{6},
     \qquad 1 \le a,b \le 6,
 \end{equation}
-that is, all entries of $U_i^\dagger U_j$ have magnitude $1/\sqrt{6}$. The matrix $U_i^\dagger U_j$ is unitary, while this condition constrains only its entrywise squared moduli. Equivalently,
+In other words, all entries of $U_i^\dagger U_j$ have magnitude $1/\sqrt{6}$. Although $U_i^\dagger U_j$ is itself unitary, the mutual unbiasedness condition constrains only its entrywise squared moduli. In matrix form, the condition is
 \begin{equation}
     |U_i^\dagger U_j|^2 = \frac{1}{6}\mathbf{1}_{6\times6},
     \label{eq:mub-condition-matrix}
@@ -133,13 +135,23 @@ that is, all entries of $U_i^\dagger U_j$ have magnitude $1/\sqrt{6}$. The matri
 where the absolute value and square are taken entrywise, and $\mathbf{1}_{6 \times 6}$ denotes the $6 \times 6$ all-ones matrix.
 
 
-For an exact collection of $n$ mutually unbiased bases, condition~\eqref{eq:mub-condition-matrix} must hold for every pair $1 \leq i < j \leq n$. In this paper, we do not attempt to certify exact existence or nonexistence. Instead, we use a continuous loss function to study approximate configurations and the structure of low-loss basins found by numerical optimization.
+For an exact collection of $n$ mutually unbiased bases, condition~\eqref{eq:mub-condition-matrix} must hold for every pair $1 \leq i < j \leq n$. In this paper, we do not attempt to certify exact existence or nonexistence of complete MUB sets in dimension six. Instead, we use a continuous optimization loss function to study approximate configurations and the pairwise defect structures of low-loss configurations found by the specified numerical workflow.
 
 \subsection{Approximate MUB Loss}
 
-For a pair of candidate bases $U_i$ and $U_j$, we define the pairwise approximate-MUB defect as
+For a pair of candidate bases $U_i$ and $U_j$, define the squared-modulus overlap matrix
+\[
+M_{ij} = |U_i^\dagger U_j|^2,
+\]
+where the square is taken entrywise. The pairwise approximate-MUB defect is then defined as the squared Frobenius deviation of \(M_{ij}\) from the uniform target matrix:
 \begin{equation}
     \ell_{ij}
+    =
+    \left\|
+    M_{ij}
+    -
+    \frac{1}{6}\mathbf{1}_{6 \times 6}
+    \right\|_F^2
     =
     \left\|
     |U_i^\dagger U_j|^2
@@ -148,6 +160,8 @@ For a pair of candidate bases $U_i$ and $U_j$, we define the pairwise approximat
     \right\|_F^2 .
     \label{eq:pairwise-loss}
 \end{equation}
+Thus, \(\ell_{ij}=0\) if and only if the pair \((U_i,U_j)\) satisfies the mutual unbiasedness condition exactly.
+
 The total $n$-basis loss is the sum of all pairwise defects:
 \begin{equation}
     \mathcal{L}_n
@@ -163,26 +177,33 @@ The total $n$-basis loss is the sum of all pairwise defects:
     \right\|_F^2 .
     \label{eq:total-loss}
 \end{equation}
-Thus, $\mathcal{L}_n=0$ corresponds to an exact mutually unbiased collection of $n$ bases. In numerical experiments, nonzero values of $\mathcal{L}_n$ quantify the residual deviation from mutual unbiasedness.
+Consequently, $\mathcal{L}_n=0$ corresponds to an exact mutually unbiased collection of $n$ bases. In numerical experiments, nonzero values of $\mathcal{L}_n$ quantify the aggregate residual deviation from mutual unbiasedness.
 
-The loss admits a natural pairwise decomposition. We retain the individual quantities $\ell_{ij}$ in all experiments because they reveal whether residual defect is localized in a small number of basis pairs or distributed across the whole configuration. This decomposition also allows the optimized configuration to be viewed as a weighted complete graph on $n$ vertices, with vertices corresponding to bases and edge weights corresponding to pairwise defects.
+The loss admits a natural pairwise decomposition, which is important for the analysis in this work. Rather than recording only the scalar value \(\mathcal{L}_n\), the workflow retains the individual quantities \(\ell_{ij}\) for all unordered basis pairs. These pairwise terms reveal whether residual defect is localized in a small number of basis pairs or distributed across the entire configuration. Equivalently, an optimized configuration can be viewed as a weighted complete graph on \(n\) vertices: vertices correspond to bases, and edge weights correspond to pairwise defects \(\ell_{ij}\). This representation is used later to distinguish exact pairs, partial-exact structures, and fully defective observed configurations.
 
 \subsection{Unanchored Optimization}
 
-The optimization problem studied here is unanchored. No basis is fixed in advance to the identity, Fourier basis, or any other canonical representative. Instead, all candidate bases $U_1,\ldots,U_n$ are optimized simultaneously.
-
-The unanchored AMUB optimization problem is therefore
+The optimization problem studied here is unanchored, no basis is fixed in advance to the identity, to a Fourier basis, or to any other canonical representative. Instead, all candidate bases $U_1,\ldots,U_n$ are optimized simultaneously. The unanchored AMUB optimization problem is therefore
 \begin{equation}
     \min_{U_1,\ldots,U_n \in U(6)}
     \mathcal{L}_n(U_1,\ldots,U_n).
     \label{eq:unanchored-optimization}
 \end{equation}
 
-This formulation treats all candidate bases symmetrically. The objective is invariant under a common left unitary action,
+This formulation treats all candidate bases symmetrically during optimization. The objective is invariant under a common left unitary action,
 \[
 (U_1,\ldots,U_n) \mapsto (WU_1,\ldots,WU_n), \qquad W \in U(6),
 \]
-so the unanchored formulation retains a global unitary gauge freedom. In contrast, an anchored formulation fixes one basis, for example $U_1 = I$, and optimizes only the remaining bases. Anchoring is often used for classification and to fix unitary-equivalence freedoms~\cite{durt2010OnMutuallyUnbiasedBases,brierley2009MutuallyUnbiasedBases}, but it imposes a preferred reference frame during optimization. The unanchored formulation used here avoids this explicit choice and allows empirically observed structural patterns, described here as hub-like or clustered pairwise defect arrangements, to emerge from the optimization itself. Such empirical structures are consistent with the known rigidity and nonextendability phenomena for MUB configurations in dimension six~\cite{Grassl2009OnSICPOVMsMUBsd6}.
+because
+\[
+(WU_i)^\dagger(WU_j)=U_i^\dagger U_j.
+\]
+Thus, the unanchored formulation retains a global unitary gauge freedom.
+
+
+Anchored formulations are often used for classification and for fixed unitary-equivalence freedoms~\cite{durt2010OnMutuallyUnbiasedBases,brierley2009MutuallyUnbiasedBases}, Fixing a single basis, for example \(U_1=I\), can be interpreted as a gauge choice under the common left-unitary symmetry. Such a gauge fixing is not, by itself, necessarily a restriction of the underlying equivalence class. However, practical anchored searches may impose additional structure, such as fixing further bases to prescribed Fourier or Hadamard-family representatives. Those additional choices can restrict the explored numerical landscape.
+
+The unanchored formulation used here avoids imposing such representatives during optimization. All bases are allowed to move simultaneously, and structural features are extracted only after optimization from the recorded pairwise defects. This is particularly useful for the present numerical study, where empirically observed configurations can be analysed through their pairwise defect geometry. In later sections, this viewpoint is used to describe structures such as exact triples, hub-like partial-exact configurations, and fully defective observed configurations. These empirical structures are discussed in the context of known rigidity and nonextendability phenomena for MUB configurations in dimension six~\cite{Grassl2009OnSICPOVMsMUBsd6}.
 
 \subsection{Lie-Algebra Parameterization of Unitary Bases}
 
@@ -193,16 +214,18 @@ To enforce unitarity by construction, each candidate basis is parameterized usin
     H_k = H_k^\dagger .
     \label{eq:lie-exp-param}
 \end{equation}
-Since $H_k$ is Hermitian, $iH_k$ is skew-Hermitian, and therefore $\exp(iH_k)$ is unitary in exact arithmetic. This uses the Lie group--Lie algebra relation for the unitary group. The representation is not unique, but it provides a convenient differentiable parameterization for unconstrained numerical optimization.
+Since $H_k$ is Hermitian, $iH_k$ is skew-Hermitian, and therefore $\exp(iH_k)$ is unitary in exact arithmetic. This uses the Lie group--Lie algebra relation for the unitary group. The representation is not unique, but it provides a differentiable parameterization that is convenient for unconstrained numerical optimization.
 
-In the implementation, $H_k$ is obtained from an unconstrained trainable complex matrix $A_k \in \mathbb{C}^{d \times d}$ by Hermitian symmetrization. The anti-Hermitian component of $A_k$ is discarded by the symmetrization, so this implementation uses a redundant unconstrained representation of the Hermitian generator:
+In the implementation, $H_k$ is obtained from an unconstrained trainable complex matrix $A_k \in \mathbb{C}^{d \times d}$ by Hermitian symmetrization:
 \begin{equation}
     H_k
     =
     \frac{A_k + A_k^\dagger}{2}.
     \label{eq:hermitian-symmetrization}
 \end{equation}
-Note that this parameterization uses $2d^2$ real variables (from the complex entries of $A_k$) to represent a space of Hermitian generators that only has dimension $d^2$. Although mathematically redundant, this unconstrained parameterization is numerically stable, avoids the need to maintain explicit parameter constraints, and is highly compatible with standard automatic differentiation and gradient-based optimization frameworks. The trainable variables are therefore the unconstrained matrices $A_1,\ldots,A_n$, while the matrices used in the loss are the unitary matrices generated by~\eqref{eq:lie-exp-param}. This separates the unitary constraint from the AMUB objective: the optimizer does not need to enforce unitarity through penalty terms or projections.
+This construction discards the anti-Hermitian component of \(A_k\), ensuring that the generator used in the exponential is Hermitian. The resulting representation is redundant: the complex matrix \(A_k\) contains \(2d^2\) real degrees of freedom, whereas the space of Hermitian \(d\times d\) matrices has real dimension \(d^2\). This redundancy is accepted deliberately because it allows the trainable variables to remain unconstrained complex matrices while the forward model enforces the Hermitian and unitary structure.
+
+The trainable variables are therefore the unconstrained matrices \(A_1,\ldots,A_n\), while the matrices appearing in the AMUB loss are the unitary matrices generated by~\eqref{eq:lie-exp-param}. This separates the unitary constraint from the AMUB objective: the optimizer does not need to enforce orthonormality through projection steps or penalty terms. Instead, deviations from exact unitarity arise only from finite-precision arithmetic and the numerical matrix-exponential pathway, and are monitored separately through the unitarity residuals defined below.
 
 Combining~\eqref{eq:lie-exp-param} and~\eqref{eq:hermitian-symmetrization}, the computational parameterization is
 \begin{equation}
@@ -215,9 +238,10 @@ Combining~\eqref{eq:lie-exp-param} and~\eqref{eq:hermitian-symmetrization}, the 
     k=1,\ldots,n.
     \label{eq:computational-param}
 \end{equation}
-The resulting map $A_k \mapsto U_k(A_k)$ is differentiable, so gradients of the loss can be propagated through the matrix exponential using automatic differentiation~\cite{Paszke2017AutomaticDI}.
+The map $A_k \mapsto U_k(A_k)$ is differentiable through the operations used in the forward model, so gradients of the AMUB loss can be propagated through the matrix exponential using automatic differentiation~\cite{Paszke2017AutomaticDI}.
 
-The numerical optimization problem can then be written as
+
+For the dimension-six case study, the resulting numerical optimization problem can then be written as
 \begin{equation}
     \min_{A_1,\ldots,A_n \in \mathbb{C}^{6 \times 6}}
     \mathcal{L}_n
@@ -226,12 +250,13 @@ The numerical optimization problem can then be written as
     \right).
     \label{eq:parametric-optimization}
 \end{equation}
+Although the optimization variables in~\eqref{eq:parametric-optimization} are unconstrained matrices, the corresponding bases used in the loss are unitary by construction in exact arithmetic.
 
 \subsection{Diagnostics Derived from the Loss}
 
-The total loss $\mathcal{L}_n$ provides a scalar measure of approximate mutual unbiasedness, but it does not by itself describe the structure of the residual defect. For this reason, the workflow records several pairwise diagnostics in addition to the aggregate objective value.
+The total loss $\mathcal{L}_n$ provides a scalar measure of aggregate approximate MUB defect, but it does not by itself describe how the residual error is distributed across the basis pairs. For this reason, the workflow records pairwise diagnostics in addition to the aggregate objective value.
 
-For each pair $(i,j)$, we compute the overlap matrix
+For each unanchored pair $(i,j)$, we compute the squared-modulus overlap matrix
 \begin{equation}
     M_{ij}
     =
@@ -249,7 +274,7 @@ where the absolute value and square are taken entrywise. The corresponding pairw
     \right\|_F^2 ,
     \label{eq:pairwise-loss-diagnostic}
 \end{equation}
-which is the same pairwise defect used in the total loss~\eqref{eq:total-loss}. We also record the maximum entrywise deviation
+which is the same pairwise defect used in the total loss~\eqref{eq:total-loss}. We also record the maximum entrywise deviation from the target overlap value,
 
 \begin{equation}
     \delta_{ij}
@@ -262,29 +287,34 @@ which is the same pairwise defect used in the total loss~\eqref{eq:total-loss}. 
     \right|.
     \label{eq:max-deviation}
 \end{equation}
+The quantity \(\ell_{ij}\) measures the total squared deviation of a pair, while \(\delta_{ij}\) records the worst entrywise deviation. These two diagnostics are complementary: two pairs may have similar Frobenius defects but different maximum entrywise deviations.
+
 
 Given a tolerance $\tau>0$, a pair $(i,j)$ is classified as near-exact if
 \begin{equation}
     \delta_{ij} \leq \tau .
     \label{eq:near-exact-classification}
 \end{equation}
-In the complex128 reference experiments, the primary tolerance used in the reported summaries is $\tau=10^{-6}$. For precision-sensitivity analysis, especially in complex64, near-exact counts are also recomputed using relaxed tolerances. This separates the numerical classification rule from the underlying recorded quantities $\ell_{ij}$ and $\delta_{ij}$.
+The primary tolerance used in the reported summaries is \(\tau=10^{-6}\). For precision-sensitivity analysis, especially in reduced precision, near-exact counts are also recomputed using relaxed tolerances such as \(10^{-5}\) and \(10^{-4}\). This separates the recorded numerical quantities \(\ell_{ij}\) and \(\delta_{ij}\) from the tolerance-dependent classification rule.
 
-We also monitor numerical unitarity by computing, for each optimized basis,
+In addition to pairwise AMUB diagnostics, we monitor numerical unitarity by computing, for each optimized basis,
 \begin{equation}
     \epsilon_k
     =
     \|U_k^\dagger U_k - I_6\|_F .
     \label{eq:unitarity-residual}
 \end{equation}
-Although the Lie-exponential parameterization enforces unitarity in exact arithmetic, this diagnostic measures deviations introduced by finite-precision arithmetic and numerical matrix exponentiation. In the reported experiments, these residuals are used to verify that the observed AMUB defects are not artifacts of substantial loss of unitarity.
+Although the Lie-exponential parameterization enforces unitarity in exact arithmetic, \(\epsilon_k\) measures deviations introduced by finite-precision arithmetic and numerical matrix exponentiation. These residuals are used as a consistency check: observed AMUB defects should not be attributed to loss of orthonormality unless the corresponding unitarity residuals are large enough to explain them.
+
+The workflow also records generator-norm diagnostics for the Hermitian matrices \(H_k\). These diagnostics are used to monitor the scale of the Lie-algebra parameters and, when the Taylor-series matrix-exponential compatibility layer is used for accelerator execution, to evaluate the relevant truncation-error bounds under the observed generator norms.
 
 \subsection{Interpretation as Pairwise Defect Geometry}
 
-The pairwise decomposition of $\mathcal{L}_n$ is central to the interpretation of the numerical results. Each optimized configuration determines a weighted complete graph with vertex set $\{1,\ldots,n\}$ and edge weights $\ell_{ij}$. We refer to this weighted-graph representation as the pairwise defect geometry of the configuration. Near-zero edges correspond to near-exact MUB pairs, while nonzero edges indicate defective pairwise relations.
+The pairwise decomposition of \(\mathcal{L}_n\) is central to the interpretation of the numerical results. Each optimized configuration determines a weighted complete graph with vertex set \(\{1,\ldots,n\}\). The vertices represent candidate bases, and the edge weight between vertices \(i\) and \(j\) is the pairwise AMUB defect \(\ell_{ij}\). We refer to this weighted-graph representation as the pairwise defect geometry of the configuration.
 
-This graph viewpoint allows different structural regimes to be distinguished. For example, a configuration may contain one basis that forms near-exact pairs with several others, together with a localized defective triangle among the remaining bases. Alternatively, it may exhibit globally distributed defect, with every pair carrying nonzero loss. The results sections use this pairwise defect geometry to compare optimized configurations across different values of $n$ and numerical precisions.
+In this representation, near-zero edges correspond to exact or near-exact MUB pairs under the chosen tolerance, while nonzero edges indicate defective pairwise relations. This graph viewpoint allows configurations with the same or similar aggregate loss to be distinguished by how their residual defect is distributed. For example, a configuration may contain one basis that forms near-exact pairs with several others, together with a localized defective triangle among the remaining bases. Alternatively, it may exhibit fully distributed defect, with every pair carrying nonzero loss.
 
+This interpretation is particularly useful in the dimension-six experiments reported later. It allows the results to be described not only by scalar loss values, but also by structural patterns in the pairwise defects. In particular, the pairwise defect geometry is used to compare exact three-basis configurations, structured four-basis partial-exact configurations, and fully defective observed configurations for larger candidate basis counts. The same diagnostics also support comparison across numerical precisions, since near-exact classifications may depend on tolerance while the underlying pairwise losses and maximum deviations remain explicitly recorded.
 
 \section{Software Workflow and Precision Policy}
 \label{sec:software-workflow}
