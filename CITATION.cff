@@ -11,6 +11,7 @@ authors:
     given-names: "Saim"
 repository-code: "https://github.com/fatahjamro/amub-optimization-software"
 url: "https://github.com/fatahjamro/amub-optimization-software"
+doi: "10.5281/zenodo.20689039"
 version: "1.0.0"
 date-released: "2026-06-14"
 license: "Apache-2.0"
