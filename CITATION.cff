@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "d6mubOptimization-v2: A Generalized Software Workflow for Unanchored Approximate MUB Optimization"
+title: "d6mubOptimization-v2: Reproducible Software Workflow for Unanchored Approximate MUB Optimization"
 message: "If you use this software in your research, please cite it using the metadata from this file."
 type: software
 authors:
@@ -10,14 +10,19 @@ authors:
   - family-names: "Ghafoor"
     given-names: "Saim"
 repository-code: "https://github.com/fatahjamro/d6mubOptimization-v2"
+url: "https://github.com/fatahjamro/d6mubOptimization-v2"
 version: "1.0.0"
 date-released: "2026-06-14"
-license: "MIT"
+license: "Apache-2.0"
 keywords:
   - "mutually unbiased bases"
   - "quantum information"
   - "approximate MUB"
+  - "AMUB optimization"
+  - "dimension six"
+  - "Lie-algebra parameterization"
   - "PyTorch"
   - "mathematical software"
   - "reproducibility"
+  - "hardware acceleration"
   - "quantum hardware"
