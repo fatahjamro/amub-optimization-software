@@ -14,5 +14,3 @@ dependencies:
   - tqdm
   - pytest
   - pip
-  - pip:
-      - marimo>=0.23.2

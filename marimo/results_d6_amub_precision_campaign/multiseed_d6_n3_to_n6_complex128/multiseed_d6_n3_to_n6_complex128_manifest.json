@@ -1,8 +1,0 @@
-{
-  "campaign_name": "multiseed_d6_n3_to_n6_complex128",
-  "d": 6,
-  "dtype": "complex128",
-  "num_runs": 20,
-  "per_run_csv": "multiseed_d6_n3_to_n6_complex128_per_run_results.csv",
-  "aggregate_summary_json": "multiseed_d6_n3_to_n6_complex128_aggregate_summary.json"
-}

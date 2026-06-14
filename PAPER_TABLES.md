@@ -30,7 +30,7 @@ This document provides a precise mapping from the tables and figures in the manu
 
 ### Table 5: Workstation hardware benchmark (seconds per 1000 steps)
 *   **LaTeX Label:** `tab:hardware-benchmarks`
-*   **Source File:** [hardware_benchmarks.json](file:///Users/fatah/Documents/d6mubOptimization-v2/marimo/results_d6_amub_precision_campaign/hardware_benchmarks.json)
+*   **Source File:** [workstation_hardware_benchmarks.json](file:///Users/fatah/Documents/d6mubOptimization-v2/results/summaries/workstation_hardware_benchmarks.json)
 *   **Key Fields:** `cpu_complex128`, `cpu_complex64`, `mps_complex64_taylor`, `speedup_vs_128`
 
 ### Table 6: JANUS CUDA benchmark (seconds per 1000 steps)
