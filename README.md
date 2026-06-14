@@ -5,7 +5,7 @@ This repository accompanies the manuscript:
 
 **A Reproducible Software Workflow for Unanchored Approximate MUB Optimization: A Dimension Six Case Study**
 
-Authors: Abdul Fatah, Ian McLoughlin, and Saim Ghafoor
+Authors: Abdul Fatah [![ORCID](https://orcid.org/sites/default/files/images/orcid_16x16.png)](https://orcid.org/0009-0007-5254-8595), Ian McLoughlin [![ORCID](https://orcid.org/sites/default/files/images/orcid_16x16.png)](https://orcid.org/0000-0003-0424-4849), and Saim Ghafoor [![ORCID](https://orcid.org/sites/default/files/images/orcid_16x16.png)](https://orcid.org/0000-0001-8627-5723)
 
 - GitHub repository: https://github.com/fatahjamro/amub-optimization-software
 - Concept DOI: https://doi.org/10.5281/zenodo.20689038
