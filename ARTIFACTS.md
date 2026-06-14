@@ -1,6 +1,6 @@
 # ARTIFACTS.md
 
-# Software Artifacts in `d6mubOptimization-v2`
+# Software Artifacts in `amub-optimization-software`
 
 This document details the file schema and output organization of the saved optimization runs and QPU verification experiments.
 
@@ -69,7 +69,7 @@ The QPU verification output is stored under a run's `quantum_results/` subdirect
           "job_id": "d8n2oo3nn5bs738u1qgg",
           "backend": "ibm_marrakesh",
           "shots": 2000,
-          "run_dir": "/Users/fatah/Documents/d6mubOptimization-v2/results/runs/d6_n4_complex128_seed3",
+          "run_dir": "/Users/fatah/Documents/amub-optimization-software/results/runs/d6_n4_complex128_seed3",
           "metadata": [
             {"pair": [0, 1], "input_state": 0},
             ...

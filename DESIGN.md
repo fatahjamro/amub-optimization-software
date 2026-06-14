@@ -1,8 +1,8 @@
 # DESIGN.md
 
-# Software Design and Architecture of `d6mubOptimization-v2`
+# Software Design and Architecture of `amub-optimization-software`
 
-This document details the mathematical-software design, module architecture, and component relationships of the `d6mubOptimization-v2` package. The package is structured to be dimension-agnostic ($d$) and basis-count-agnostic ($n$).
+This document details the mathematical-software design, module architecture, and component relationships of the `amub-optimization-software` package. The package is structured to be dimension-agnostic ($d$) and basis-count-agnostic ($n$).
 
 ---
 
@@ -18,7 +18,7 @@ To guarantee that the optimized bases remain strictly unitary throughout the opt
    $$U_k = \exp(iH_k)$$
    This mapping ensures that $U_k$ remains unitary to machine precision, regardless of the values in $A_k$.
 
-This logic is implemented in the `UnanchoredAMUBModel` class in [model.py](file:///Users/fatah/Documents/d6mubOptimization-v2/src/amub/model.py).
+This logic is implemented in the `UnanchoredAMUBModel` class in [model.py](file:///Users/fatah/Documents/amub-optimization-software/src/amub/model.py).
 
 ---
 
@@ -33,7 +33,7 @@ The optimization objective measures the entrywise squared modulus deviation from
 3. **Total Loss:** The total loss is the sum over all unordered pairs:
    $$\mathcal{L}_n = \sum_{1 \le i < j \le n} \ell_{ij}$$
 
-This logic is implemented in [loss.py](file:///Users/fatah/Documents/d6mubOptimization-v2/src/amub/loss.py).
+This logic is implemented in [loss.py](file:///Users/fatah/Documents/amub-optimization-software/src/amub/loss.py).
 
 ---
 
@@ -52,7 +52,7 @@ where $X = iH$.
 ### Truncation Safeguards
 The Taylor series uses a default order $N=20$. To ensure precision, the function computes the Frobenius norm of the generator matrix $X = iH$. If the norm exceeds $3.0$, a warning is raised to alert the user that the Taylor approximation order may need to be increased or the learning rate/initialization scale reduced.
 
-This layer and its safeguards are implemented in [taylor_exp.py](file:///Users/fatah/Documents/d6mubOptimization-v2/src/amub/taylor_exp.py).
+This layer and its safeguards are implemented in [taylor_exp.py](file:///Users/fatah/Documents/amub-optimization-software/src/amub/taylor_exp.py).
 
 ---
 
@@ -65,4 +65,4 @@ After optimization, the best basis configurations are analyzed using several dia
    $$\delta_{ij} = \max_{a,b} \left| |(U_i^\dagger U_j)_{ab}|^2 - \frac{1}{d} \right|$$
 3. **Near-Exact Pair Classification:** Classified as "near-exact" if $\delta_{ij} \le \tau$, where $\tau$ is the primary tolerance threshold (default $\tau = 10^{-6}$).
 
-These diagnostics are implemented in [diagnostics.py](file:///Users/fatah/Documents/d6mubOptimization-v2/src/amub/diagnostics.py).
+These diagnostics are implemented in [diagnostics.py](file:///Users/fatah/Documents/amub-optimization-software/src/amub/diagnostics.py).

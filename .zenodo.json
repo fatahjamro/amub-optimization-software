@@ -1,5 +1,5 @@
 {
-  "title": "d6mubOptimization-v2: A Reproducible Software Workflow for Unanchored Approximate MUB Optimization: A Case Study in Dimension Six",
+  "title": "amub-optimization-software: A Reproducible Software Workflow for Unanchored Approximate MUB Optimization: A Case Study in Dimension Six",
   "upload_type": "software",
   "description": "A reproducible Python/PyTorch workflow for unanchored approximate mutually unbiased basis optimization, including dimension-six multi-seed campaigns, precision comparison, hardware benchmarks, and QPU execution analysis.",
   "creators": [

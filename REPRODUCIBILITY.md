@@ -1,6 +1,6 @@
 # REPRODUCIBILITY.md
 
-# Reproducibility Guide for `d6mubOptimization-v2`
+# Reproducibility Guide for `amub-optimization-software`
 
 This guide provides instructions to reproduce the numerical and hardware benchmarking results reported in the manuscript.
 

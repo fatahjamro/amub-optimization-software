@@ -2,13 +2,13 @@
 
 # Computational Experiments Protocol
 
-This document details the configuration, parameters, and design of the experimental campaigns executed within the `d6mubOptimization-v2` package.
+This document details the configuration, parameters, and design of the experimental campaigns executed within the `amub-optimization-software` package.
 
 ---
 
 ## 1. Single-Seed Validation Sweep
 *   **Purpose:** Serves as a positive control validation of the optimization pipeline across basis counts $n = 2, \ldots, 7$ in dimension $d = 6$.
-*   **Configuration:** [single_seed_sweep.yaml](file:///Users/fatah/Documents/d6mubOptimization-v2/configs/single_seed_sweep.yaml)
+*   **Configuration:** [single_seed_sweep.yaml](file:///Users/fatah/Documents/amub-optimization-software/configs/single_seed_sweep.yaml)
 *   **Key Parameters:**
     *   `steps`: 10000 (standard), 50 (smoke-test)
     *   `seed`: 1234
@@ -23,8 +23,8 @@ This document details the configuration, parameters, and design of the experimen
 *   **Purpose:** To map the non-convex optimization landscape of dimension-six approximate MUBs and compile convergence statistics.
 *   **Design:** 100 independent random seeds ($s \in \{0, 1, \dots, 99\}$) are optimized for $n \in \{3, 4, 5, 6\}$.
 *   **HPC Configurations:**
-    *   Double-Precision: [multiseed_janus_100.yaml](file:///Users/fatah/Documents/d6mubOptimization-v2/configs/multiseed_janus_100.yaml)
-    *   Single-Precision: [multiseed_janus_64.yaml](file:///Users/fatah/Documents/d6mubOptimization-v2/configs/multiseed_janus_64.yaml)
+    *   Double-Precision: [multiseed_janus_100.yaml](file:///Users/fatah/Documents/amub-optimization-software/configs/multiseed_janus_100.yaml)
+    *   Single-Precision: [multiseed_janus_64.yaml](file:///Users/fatah/Documents/amub-optimization-software/configs/multiseed_janus_64.yaml)
 *   **Key Parameters:**
     *   `steps`: 10000
     *   `learning_rate`: 0.02
@@ -35,15 +35,15 @@ This document details the configuration, parameters, and design of the experimen
 ## 3. Precision Sensitivity Campaign
 *   **Purpose:** Compare convergence accuracy and optimizer path stability between double precision (`complex128`) and single precision (`complex64`).
 *   **Configurations:**
-    *   [multiseed_complex128.yaml](file:///Users/fatah/Documents/d6mubOptimization-v2/configs/multiseed_complex128.yaml)
-    *   [multiseed_complex64.yaml](file:///Users/fatah/Documents/d6mubOptimization-v2/configs/multiseed_complex64.yaml)
+    *   [multiseed_complex128.yaml](file:///Users/fatah/Documents/amub-optimization-software/configs/multiseed_complex128.yaml)
+    *   [multiseed_complex64.yaml](file:///Users/fatah/Documents/amub-optimization-software/configs/multiseed_complex64.yaml)
 *   **Evaluation Metrics:** Compare minimum, median, and maximum losses, final unitarity residuals, and the sensitivity of "near-exact" pair classifications to different tolerance parameters ($10^{-4}$ vs. $10^{-6}$ vs. $10^{-8}$).
 
 ---
 
 ## 4. Hardware Performance Benchmarks
 *   **Purpose:** Map the execution speed crossover point between standard CPU execution and hardware-accelerated GPU execution using the custom Taylor-series layer.
-*   **Configuration:** [hardware_benchmarks.yaml](file:///Users/fatah/Documents/d6mubOptimization-v2/configs/hardware_benchmarks.yaml)
+*   **Configuration:** [hardware_benchmarks.yaml](file:///Users/fatah/Documents/amub-optimization-software/configs/hardware_benchmarks.yaml)
 *   **Key Parameters:**
     *   `dimensions`: $[6, 12, 24, 48, 96]$
     *   `steps`: 1000

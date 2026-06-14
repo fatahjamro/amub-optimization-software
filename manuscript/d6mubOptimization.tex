@@ -101,6 +101,9 @@ We compare complex128 and complex64 campaigns using the same CPU/native-matrix-e
 \textbf{Hardware portability and scaling benchmarks.}
 We benchmark the workflow across increasing dimensions and hardware backends. On the tested benchmark grid \(d\in\{6,12,24,48,96\}\), GPU execution is slower at small dimensions but becomes advantageous at larger dimensions: the crossover occurs between \(d=24\) and \(d=48\) for complex128 and between \(d=48\) and \(d=96\) for complex64. These benchmarks demonstrate the portability of the same software stack across consumer and HPC-style execution environments.
 
+\textbf{Physical QPU execution check.}
+We embed a representative \(d=6,n=4\) optimized AMUB configuration into three-qubit circuits and execute the resulting transition unitaries on \texttt{ibm\_marrakesh}. The measured losses show that compilation overhead and hardware noise obscure the distinction between classically near-exact and defective pairs, providing an initial assessment of the practical challenges of executing dimension-six AMUB unitaries on current QPUs.
+
 \textbf{Reproducible visualization and representative-run selection.}
 The workflow produces aggregate summaries and representative-run manifests for visualization. These include representative positive controls, exact or near-exact triples, structured four-basis partial-exact configurations, fully defective observed \(n=5\) and \(n=6\) configurations, and an exploratory \(n=7\) complete-target run. The visualization stage reads saved artifacts rather than rerunning optimization, supporting reproducible figure generation.
 
@@ -957,7 +960,7 @@ The hardware benchmarks demonstrate that the same software stack can be executed
 
 The results are numerical and do not constitute a proof of existence or nonexistence of complete MUB sets in dimension six. They are conditioned on the unanchored Lie-exponential parameterization, Adam optimizer, initialization scale, step schedule, numerical precision, backend pathway, finite seed set, and near-exact tolerance policy. Nevertheless, the artifact-based workflow provides a reproducible basis for further investigation. The complete software codebase and generated results are made available at
 
-\url{https://github.com/fatahjamro/d6mubOptimization-v2}.
+\url{https://github.com/fatahjamro/amub-optimization-software}.
 
 Future work includes larger seed campaigns, additional optimizer and parameterization comparisons, systematic \(n=7\) campaigns, extended precision studies, validation in further prime and prime-power dimensions, and broader searches in other composite dimensions.
 

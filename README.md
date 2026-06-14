@@ -6,7 +6,7 @@ This repository accompanies the manuscript:
 
 Authors: Abdul Fatah, Ian McLoughlin, and Saim Ghafoor
 
-- GitHub repository: https://github.com/fatahjamro/d6mubOptimization-v2
+- GitHub repository: https://github.com/fatahjamro/amub-optimization-software
 - Archived software DOI: **[insert Zenodo DOI after release]**
 - Manuscript / arXiv: **[insert arXiv link after posting]**
 - Data archive DOI, if separate: **[insert data DOI if applicable]**
@@ -61,7 +61,7 @@ The numerical results should be interpreted as reproducible evidence about the o
 ## Repository Structure
 
 ```text
-d6mubOptimization-v2/
+amub-optimization-software/
 │
 ├── README.md
 ├── DESIGN.md

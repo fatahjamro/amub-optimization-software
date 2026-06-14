@@ -15,27 +15,27 @@ This document provides a precise mapping from the tables and figures in the manu
 
 ### Table 2: Single-seed complex128 sweep over $n=2,\dots,7$ in dimension six
 *   **LaTeX Label:** `tab:single-seedSweep`
-*   **Source File:** [single_seed_sweep.csv](file:///Users/fatah/Documents/d6mubOptimization-v2/results/summaries/single_seed_sweep.csv) (fully populated by `reproduce.sh`).
+*   **Source File:** [single_seed_sweep.csv](file:///Users/fatah/Documents/amub-optimization-software/results/summaries/single_seed_sweep.csv) (fully populated by `reproduce.sh`).
 *   **Key Columns:** `n_bases`, `best_loss`, `near_exact_pairs_primary`
 
 ### Table 3: Multi-seed complex128 campaign for $n=3,\dots,6$
 *   **LaTeX Label:** `tab:complex128-multiseed`
-*   **Source File:** [precision_comparison_summary.csv](file:///Users/fatah/Documents/d6mubOptimization-v2/results/summaries/precision_comparison_summary.csv) (filter where `dtype == complex128`).
+*   **Source File:** [precision_comparison_summary.csv](file:///Users/fatah/Documents/amub-optimization-software/results/summaries/precision_comparison_summary.csv) (filter where `dtype == complex128`).
 *   **Key Columns:** `n_bases`, `loss_min`, `loss_median`, `loss_max`, `near_exact_min`, `near_exact_median`, `near_exact_max`
 
 ### Table 4: Precision comparison for multi-seed AMUB campaigns in dimension six
 *   **LaTeX Label:** `tab:precision-comparison`
-*   **Source File:** [precision_comparison_summary.csv](file:///Users/fatah/Documents/d6mubOptimization-v2/results/summaries/precision_comparison_summary.csv) (compares `complex128` vs `complex64` rows).
+*   **Source File:** [precision_comparison_summary.csv](file:///Users/fatah/Documents/amub-optimization-software/results/summaries/precision_comparison_summary.csv) (compares `complex128` vs `complex64` rows).
 *   **Key Columns:** `n_bases`, `dtype`, `loss_min`, `loss_median`, `loss_max`, `near_exact_min`, `near_exact_median`, `near_exact_max`
 
 ### Table 5: Workstation hardware benchmark (seconds per 1000 steps)
 *   **LaTeX Label:** `tab:hardware-benchmarks`
-*   **Source File:** [workstation_hardware_benchmarks.json](file:///Users/fatah/Documents/d6mubOptimization-v2/results/summaries/workstation_hardware_benchmarks.json)
+*   **Source File:** [workstation_hardware_benchmarks.json](file:///Users/fatah/Documents/amub-optimization-software/results/summaries/workstation_hardware_benchmarks.json)
 *   **Key Fields:** `cpu_complex128`, `cpu_complex64`, `mps_complex64_taylor`, `speedup_vs_128`
 
 ### Table 6: JANUS CUDA benchmark (seconds per 1000 steps)
 *   **LaTeX Label:** `tab:hardware-benchmarks-janus`
-*   **Source File:** [hardware_benchmark_summary.csv](file:///Users/fatah/Documents/d6mubOptimization-v2/results/summaries/hardware_benchmark_summary.csv)
+*   **Source File:** [hardware_benchmark_summary.csv](file:///Users/fatah/Documents/amub-optimization-software/results/summaries/hardware_benchmark_summary.csv)
 *   **Key Columns:** `dimension`, `cpu_complex128_seconds`, `gpu_complex128_seconds`, `cpu_complex64_seconds`, `gpu_complex64_seconds`
 
 ---
@@ -54,17 +54,17 @@ This document provides a precise mapping from the tables and figures in the manu
 
 ### Figure 3: Classical and QPU pairwise-loss comparison
 *   **LaTeX Label:** `fig:compare-classical-vs-qpu`
-*   **Source Data:** [qpu_results.json](file:///Users/fatah/Documents/d6mubOptimization-v2/results/runs/d6_n4_complex128_seed3/quantum_results/qpu_results.json)
-*   **Image File:** [compare_classical_vs_qpu.png](file:///Users/fatah/Documents/d6mubOptimization-v2/results/runs/d6_n4_complex128_seed3/quantum_results/compare_classical_vs_qpu.png)
+*   **Source Data:** [qpu_results.json](file:///Users/fatah/Documents/amub-optimization-software/results/runs/d6_n4_complex128_seed3/quantum_results/qpu_results.json)
+*   **Image File:** [compare_classical_vs_qpu.png](file:///Users/fatah/Documents/amub-optimization-software/results/runs/d6_n4_complex128_seed3/quantum_results/compare_classical_vs_qpu.png)
 
 ### Figure 4: Best AMUB loss summary in $d=6$
 *   **LaTeX Label:** `fig:loss-summary-by-n-precision1`
-*   **Source Data:** [precision_comparison_summary.csv](file:///Users/fatah/Documents/d6mubOptimization-v2/results/summaries/precision_comparison_summary.csv)
+*   **Source Data:** [precision_comparison_summary.csv](file:///Users/fatah/Documents/amub-optimization-software/results/summaries/precision_comparison_summary.csv)
 *   **Image File:** `results/figures/loss_summary_by_n_precision.pdf`
 
 ### Figure 5: Near-exact MUB pair counts in $d=6$
 *   **LaTeX Label:** `fig:near-exact-pair-summary1`
-*   **Source Data:** [precision_comparison_summary.csv](file:///Users/fatah/Documents/d6mubOptimization-v2/results/summaries/precision_comparison_summary.csv)
+*   **Source Data:** [precision_comparison_summary.csv](file:///Users/fatah/Documents/amub-optimization-software/results/summaries/precision_comparison_summary.csv)
 *   **Image File:** `results/figures/near_exact_pair_summary_by_n_precision.pdf`
 
 ### Figure 6: Sorted pairwise-loss spectra (complex128)
