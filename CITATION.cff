@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: "d6mubOptimization-v2: A Generalized Software Workflow for Unanchored Approximate MUB Optimization"
+message: "If you use this software in your research, please cite it using the metadata from this file."
+type: software
+authors:
+  - family-names: "Fatah"
+    given-names: "Abdul"
+  - family-names: "McLoughlin"
+    given-names: "Ian"
+  - family-names: "Ghafoor"
+    given-names: "Saim"
+repository-code: "https://github.com/fatahjamro/d6mubOptimization-v2"
+version: "1.0.0"
+date-released: "2026-06-14"
+license: "MIT"
+keywords:
+  - "mutually unbiased bases"
+  - "quantum information"
+  - "approximate MUB"
+  - "PyTorch"
+  - "mathematical software"
+  - "reproducibility"
+  - "quantum hardware"

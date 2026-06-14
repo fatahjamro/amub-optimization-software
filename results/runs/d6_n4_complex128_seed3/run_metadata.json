@@ -1,0 +1,31 @@
+{
+  "artifact_schema_version": "1.0",
+  "dimension": 6,
+  "n_bases": 4,
+  "seed": 3,
+  "dtype": "complex128",
+  "backend": "cpu",
+  "device_used": "cpu",
+  "matrix_exp_backend": "torch_native",
+  "optimizer": "Adam",
+  "learning_rate": 0.02,
+  "initialization_scale": 0.05,
+  "steps": 1500,
+  "best_loss": 0.05124921899628365,
+  "near_exact_tolerances": [
+    1e-06,
+    1e-05,
+    0.0001
+  ],
+  "primary_tolerance": 1e-06,
+  "near_exact_pairs_primary": 3,
+  "unitarity_residual_max": 3.5688564995425325e-15,
+  "generator_norm_max_best_iterate": 1.9912935744438744,
+  "python_version": "3.11.14",
+  "torch_version": "2.11.0",
+  "numpy_version": "2.3.5",
+  "platform": "macOS-26.4.1-arm64-arm-64bit",
+  "device_name": "CPU",
+  "timestamp_utc": "2026-05-31 02:11:26 UTC",
+  "total_elapsed_seconds": 2.4014182090759277
+}

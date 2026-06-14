@@ -1,0 +1,28 @@
+{
+  "title": "d6mubOptimization-v2: A Generalized Software Workflow for Unanchored Approximate MUB Optimization",
+  "upload_type": "software",
+  "description": "A reproducible Python/PyTorch workflow for unanchored approximate mutually unbiased basis optimization, including dimension-six multi-seed campaigns, precision comparison, hardware benchmarks, and QPU verification analysis.",
+  "creators": [
+    {
+      "name": "Fatah, Abdul"
+    },
+    {
+      "name": "McLoughlin, Ian"
+    },
+    {
+      "name": "Ghafoor, Saim"
+    }
+  ],
+  "access_right": "open",
+  "license": "MIT",
+  "keywords": [
+    "mutually unbiased bases",
+    "quantum information",
+    "approximate MUB",
+    "PyTorch",
+    "mathematical software",
+    "reproducibility",
+    "quantum hardware"
+  ],
+  "version": "1.0.0"
+}

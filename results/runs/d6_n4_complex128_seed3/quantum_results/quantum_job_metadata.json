@@ -1,0 +1,260 @@
+{
+    "job_id": "d8n2oo3nn5bs738u1qgg",
+    "backend": "ibm_marrakesh",
+    "shots": 2000,
+    "run_dir": "/Users/fatah/Documents/d6mubOptimization-v2/results/runs/d6_n4_complex128_seed3",
+    "metadata": [
+        {
+            "pair": [
+                0,
+                1
+            ],
+            "input_state": 0
+        },
+        {
+            "pair": [
+                0,
+                1
+            ],
+            "input_state": 1
+        },
+        {
+            "pair": [
+                0,
+                1
+            ],
+            "input_state": 2
+        },
+        {
+            "pair": [
+                0,
+                1
+            ],
+            "input_state": 3
+        },
+        {
+            "pair": [
+                0,
+                1
+            ],
+            "input_state": 4
+        },
+        {
+            "pair": [
+                0,
+                1
+            ],
+            "input_state": 5
+        },
+        {
+            "pair": [
+                0,
+                2
+            ],
+            "input_state": 0
+        },
+        {
+            "pair": [
+                0,
+                2
+            ],
+            "input_state": 1
+        },
+        {
+            "pair": [
+                0,
+                2
+            ],
+            "input_state": 2
+        },
+        {
+            "pair": [
+                0,
+                2
+            ],
+            "input_state": 3
+        },
+        {
+            "pair": [
+                0,
+                2
+            ],
+            "input_state": 4
+        },
+        {
+            "pair": [
+                0,
+                2
+            ],
+            "input_state": 5
+        },
+        {
+            "pair": [
+                0,
+                3
+            ],
+            "input_state": 0
+        },
+        {
+            "pair": [
+                0,
+                3
+            ],
+            "input_state": 1
+        },
+        {
+            "pair": [
+                0,
+                3
+            ],
+            "input_state": 2
+        },
+        {
+            "pair": [
+                0,
+                3
+            ],
+            "input_state": 3
+        },
+        {
+            "pair": [
+                0,
+                3
+            ],
+            "input_state": 4
+        },
+        {
+            "pair": [
+                0,
+                3
+            ],
+            "input_state": 5
+        },
+        {
+            "pair": [
+                1,
+                2
+            ],
+            "input_state": 0
+        },
+        {
+            "pair": [
+                1,
+                2
+            ],
+            "input_state": 1
+        },
+        {
+            "pair": [
+                1,
+                2
+            ],
+            "input_state": 2
+        },
+        {
+            "pair": [
+                1,
+                2
+            ],
+            "input_state": 3
+        },
+        {
+            "pair": [
+                1,
+                2
+            ],
+            "input_state": 4
+        },
+        {
+            "pair": [
+                1,
+                2
+            ],
+            "input_state": 5
+        },
+        {
+            "pair": [
+                1,
+                3
+            ],
+            "input_state": 0
+        },
+        {
+            "pair": [
+                1,
+                3
+            ],
+            "input_state": 1
+        },
+        {
+            "pair": [
+                1,
+                3
+            ],
+            "input_state": 2
+        },
+        {
+            "pair": [
+                1,
+                3
+            ],
+            "input_state": 3
+        },
+        {
+            "pair": [
+                1,
+                3
+            ],
+            "input_state": 4
+        },
+        {
+            "pair": [
+                1,
+                3
+            ],
+            "input_state": 5
+        },
+        {
+            "pair": [
+                2,
+                3
+            ],
+            "input_state": 0
+        },
+        {
+            "pair": [
+                2,
+                3
+            ],
+            "input_state": 1
+        },
+        {
+            "pair": [
+                2,
+                3
+            ],
+            "input_state": 2
+        },
+        {
+            "pair": [
+                2,
+                3
+            ],
+            "input_state": 3
+        },
+        {
+            "pair": [
+                2,
+                3
+            ],
+            "input_state": 4
+        },
+        {
+            "pair": [
+                2,
+                3
+            ],
+            "input_state": 5
+        }
+    ]
+}

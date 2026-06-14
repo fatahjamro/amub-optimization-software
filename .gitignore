@@ -1,8 +1,7 @@
 ## --- TYPST & GENERAL ---
 # Typst is clean, but ignore logs if using a wrapper
 *.log
-# Project specific results
-results/runs/
+# Project specific results ignored below
 
 ## --- PYTHON & MARIMO ---
 # Core Python clutter and virtual environments
@@ -67,3 +66,43 @@ __pycache__/
 venv/
 __marimo__/
 .pytest_cache/
+
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# Environments
+venv/
+.env
+*.env
+.venv/
+conda-meta/
+
+# OS
+.DS_Store
+
+# Large raw outputs
+results/runs/*
+results/qpu_verification/qpu_counts_raw/
+results/qpu_verification/qpu_counts_postselected/
+results/logs/
+*.log
+*.err
+
+# Allow representative run for verification tests
+!results/runs/d6_n4_complex128_seed3/
+
+# Keep summaries and paper figures
+!results/summaries/
+!results/summaries/*.csv
+!results/summaries/*.json
+!results/figures/
+!results/figures/*
+!results/qpu_verification/qpu_job_metadata.json
+!results/qpu_verification/qpu_pairwise_losses.csv
+!results/qpu_verification/transpilation_summary.csv
+!results/qpu_verification/figures/

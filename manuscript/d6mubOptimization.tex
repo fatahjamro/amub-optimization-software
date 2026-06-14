@@ -30,11 +30,10 @@
 \affiliation{Atlantic Technological University, Ireland}
 
 \maketitle
-
 \begin{abstract}
-We present a reproducible, parameter-driven software workflow for optimizing approximate mutually unbiased basis configurations across dimensions, candidate basis counts, random seeds, numerical precisions, and hardware backends. The workflow uses a Lie-algebra parameterization of unitary bases, \(U_k=\exp(iH_k)\), and records optimized bases, pairwise overlap tensors, optimization histories, metadata, and diagnostic summaries. The implementation was developed on consumer-level Apple Silicon hardware and designed for portable execution across CPU, Apple MPS, CUDA-capable GPU, and HPC environments. A Taylor-series matrix-exponential compatibility layer supports accelerator execution when native complex matrix exponentiation is unavailable or unsuitable, while the main structural experiments use CPU/native \texttt{matrix\_exp} as the reference pathway.
+We present a reproducible, parameter-driven software workflow for optimizing approximate mutually unbiased basis (AMUB) configurations in arbitrary dimensions \(d\) using a Lie-algebra unitary parameterization. The workflow is designed for portable execution across CPU, Apple MPS, CUDA-capable GPU, and HPC backends, using a Taylor-series matrix-exponential layer as an accelerator compatibility pathway. As a dimension-six case study, we optimize unanchored configurations across 100 random seeds for basis counts \(n=3,4,5,6\) in \texttt{complex128} and \texttt{complex64} arithmetic. The workflow recovers exact three-basis configurations, identifies a recurrent four-basis partial-exact hub-and-triangle structure, and finds no near-exact pairs for \(n=5\) or \(n=6\) in the reported campaigns under the primary tolerance.
 
-As a case study, we apply the workflow to dimension six, where the existence of a complete set of seven mutually unbiased bases remains unresolved. We perform a single-seed validation sweep over \(n=2,\ldots,7\) and 100-seed complex128/complex64 campaigns over \(n=3,\ldots,6\). The complex128 campaign recovers exact three-basis configurations, repeatedly identifies a structured four-basis partial-exact basin with three near-exact hub edges and a defective triangle, and finds no near-exact pairs in any observed \(n=5\) or \(n=6\) run under the primary tolerance. The complex64 campaign preserves this qualitative transition for \(n\ge5\), although near-exact classifications and basin selection are more precision-sensitive. Hardware benchmarks show that accelerator execution is slower at small dimensions but becomes advantageous at larger dimensions. The results are reproducible numerical evidence about the sampled optimization landscape, not a proof of existence or nonexistence of MUB configurations in dimension six.
+As a hardware-execution check, we embed the representative \(d=6,n=4\) transition unitaries into three-qubit \(8\times 8\) unitaries and execute the resulting circuits on the 156-qubit Heron processor \texttt{ibm\_marrakesh} using subspace post-selection. The measured QPU pairwise losses are dominated by a hardware and compilation noise floor of approximately \(0.02\)--\(0.08\), associated with compiled circuits averaging 37 native \(\mathrm{CZ}\) gates, which obscures the distinction between classically near-exact and defective pairs. The results provide a reproducible computational framework for exploring AMUB landscapes, together with an initial assessment of the challenges involved in executing optimized dimension-six unitaries on current quantum hardware.
 \end{abstract}
 
 \section{Introduction}
@@ -824,6 +823,50 @@ For \(n=5\), all ten pairwise losses are nonzero in the selected representative 
 For \(n=6\), the selected representative configuration has all fifteen pairwise losses nonzero under the primary tolerance. The corresponding sorted spectrum therefore describes a fully defective observed configuration. The pairwise defect spectrum is useful here because it records not only the absence of near-exact pairs, but also the distribution of defect magnitudes across all basis pairs.
 
 Together, the pairwise spectra support the interpretation suggested by the aggregate summaries: the workflow recovers exact or near-exact triples, finds structured partial-exact four-basis configurations, and samples fully defective observed configurations for \(n=5\) and \(n=6\) under the stated optimization protocol.
+
+\subsection{Physical QPU Execution on IBM Quantum Hardware}
+\label{subsec:quantum-verification}
+
+As an additional hardware-execution check, we compiled and executed the representative \(d=6,n=4\) configuration on physical IBM Quantum hardware. The purpose of this experiment is not to use current noisy hardware to certify the fine AMUB defect structure, but to test the physical executability of the optimized transition unitaries and to quantify the effect of compilation and device noise on the measured pairwise AMUB losses.
+
+The representative \(d=6,n=4\) configuration was obtained from seed \(3\). For each basis pair, we formed the classical transition unitary
+\[
+W_{ij}=U_i^\dagger U_j.
+\]
+Because \(d=6\) is not a power of two, each \(6\times 6\) transition unitary was embedded into a three-qubit \(8\times 8\) unitary,
+\[
+V_{ij}=W_{ij}\oplus I_{2\times 2}.
+\]
+The two additional computational states \(|6\rangle\) and \(|7\rangle\) are therefore outside the active six-dimensional subspace.
+
+For each of the \(\binom{4}{2}=6\) basis pairs, we constructed six circuits corresponding to computational-basis inputs \(|k\rangle\) for \(k\in\{0,\ldots,5\}\). This produced \(36\) circuits in total. The circuits were transpiled using Qiskit's preset pass manager at optimization level \(1\) and executed on the 156-qubit Heron backend \texttt{ibm\_marrakesh} with \(2000\) shots per circuit. IBM's platform lists \texttt{ibm\_marrakesh} as a 156-qubit Heron r2 processor. \cite{IBMQuantumMarrakeshBackend}
+
+To reconstruct the measured transition matrices \(M_{ij}^{\mathrm{QPU}}\), measurement outcomes outside the active subspace, namely bit strings corresponding to \(|6\rangle\) and \(|7\rangle\), were discarded. The remaining counts were normalized over the six-dimensional subspace. This subspace post-selection produces an empirical estimate of the transition probabilities restricted to the embedded \(d=6\) subspace.
+
+Classically, the selected \(d=6,n=4\) representative has a partial-exact hub-and-triangle structure: three pairwise losses are near zero, while the remaining three pairwise losses are nonzero. On the physical backend, the measured pairwise losses were
+\[
+\ell_{12}^{\mathrm{QPU}}\approx 0.024,\quad
+\ell_{23}^{\mathrm{QPU}}\approx 0.044,\quad
+\ell_{02}^{\mathrm{QPU}}\approx 0.076
+\]
+for the classically near-exact pairs, and
+\[
+\ell_{03}^{\mathrm{QPU}}\approx 0.048,\quad
+\ell_{01}^{\mathrm{QPU}}\approx 0.051,\quad
+\ell_{13}^{\mathrm{QPU}}\approx 0.070
+\]
+for the classically defective pairs. Thus, the physical losses lie in an overlapping range for both classes of pair.
+
+The transpiled circuits required nontrivial compilation overhead. In the recorded transpilation data, the circuits averaged 37 native \(\mathrm{CZ}\) gates and approximately 150 single-qubit gates. The resulting physical losses fall in the range \(0.02\)--\(0.08\), which acts as an experimental noise floor for this implementation. This noise floor is larger than the classical distinction between near-exact and defective pair classes in the representative configuration. Consequently, the physical data do not resolve the classical hub-and-triangle structure on the present hardware.
+
+This experiment demonstrates that the optimized AMUB transition unitaries can be embedded, transpiled, executed, and post-selected on a physical QPU, but it also shows that current compilation depth and hardware noise dominate the small classical AMUB defects. The QPU run should therefore be interpreted as a hardware-execution and noise-assessment experiment, not as an experimental proof of the classical AMUB defect geometry.
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.7\linewidth]{compare_classical_vs_qpu}
+  \caption{Classical and QPU pairwise-loss comparison for the representative \(d=6,n=4\) configuration. The QPU data were obtained from \(2000\) shots per circuit on \texttt{ibm\_marrakesh} after post-selection onto the active six-dimensional subspace. The measured QPU losses lie in an overlapping range for classically near-exact and defective pairs, indicating that hardware and compilation noise dominate the small classical defect structure.}
+  \Description{Bar chart comparing classical and QPU physical pairwise losses for the d=6, n=4 configuration. The QPU losses are all elevated due to physical noise.}
+  \label{fig:compare-classical-vs-qpu}
+\end{figure}
 
 \subsection{Hardware Benchmarks and GPU Acceleration Performance}
 \label{subsec:hardware-benchmarks}
