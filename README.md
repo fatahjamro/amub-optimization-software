@@ -1,8 +1,8 @@
-# Reproducible Software Workflow for Unanchored Approximate MUB Optimization: A Case Study in Dimension Six
+# A Reproducible Software Workflow for Unanchored Approximate MUB Optimization: A Case Study in Dimension Six
 
 This repository accompanies the manuscript:
 
-**Reproducible Software Workflow for Unanchored Approximate MUB Optimization: A Dimension-Six Case Study**
+**A Reproducible Software Workflow for Unanchored Approximate MUB Optimization: A Dimension-Six Case Study**
 
 Authors: Abdul Fatah, Ian McLoughlin, and Saim Ghafoor
 
@@ -17,20 +17,20 @@ Authors: Abdul Fatah, Ian McLoughlin, and Saim Ghafoor
 
 This repository implements a reproducible, parameter-driven workflow for optimizing approximate mutually unbiased basis configurations. Candidate bases are represented through a Lie-algebra unitary parameterization,
 
-\[
+$$
 U_k = \exp(iH_k),
-\]
+$$
 
 where \(H_k\) is Hermitian. The workflow optimizes all candidate bases simultaneously in an unanchored formulation, records pairwise AMUB defects, and exports machine-readable artifacts for reproducibility.
 
-The main numerical case study is dimension \(d=6\). The repository includes:
+The main numerical case study is dimension $d=6$. The repository includes:
 
-- single-seed validation sweep over \(n=2,\ldots,7\);
-- 100-seed \(\texttt{complex128}\) and \(\texttt{complex64}\) campaigns over \(n=3,4,5,6\);
+- single-seed validation sweep over $n=2,\ldots,7$;
+- 100-seed $\texttt{complex128}$ and $\texttt{complex64}$ campaigns over $n=3,4,5,6;$
 - precision-comparison summaries;
 - CPU/GPU hardware benchmark scripts;
 - Taylor-series matrix-exponential compatibility layer for accelerator execution;
-- QPU verification analysis for a representative \(d=6,n=4\) configuration;
+- QPU verification analysis for a representative $d=6,n=4$ configuration;
 - scripts for regenerating summary tables and figures;
 - artifact-based saved results and metadata.
 
@@ -156,93 +156,6 @@ amub-optimization-software/
 └── reproduce.sh    
 ```
 ---
-
-## 🚀 Quick Start & Installation
-
-### 1. Environment Setup
-We recommend using either a virtual environment or conda:
-
-#### Option A: Pip Virtual Environment
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-#### Option B: Conda Environment
-```bash
-conda env create -f environment.yml
-conda activate amub-optimization-software
-```
-
----
-
-## ⚡ Reproducing Paper Results
-
-### 1. Run the Automated Test Suite
-To verify the custom Taylor layer limits, loss properties, and unitarity:
-```bash
-pytest tests/
-```
-
-### 2. Run the Smoke Test Pipeline
-To run a fast, end-to-end campaign and instantly verify the figures:
-```bash
-./reproduce_quick.sh
-```
-
-### 3. Run the Full Campaign Reproduction
-To execute the complete double and single precision multi-seed optimization campaigns (sweeping bases $n = 3, \ldots, 6$ and random seeds $0, \ldots, 99$), run:
-```bash
-./reproduce.sh
-```
-
-### 4. Run the Hardware Benchmarks
-To reproduce the performance crossover scaling (CPU vs GPU) across matrix dimensions $d = 6, 12, 24, 48, 96$, execute:
-```bash
-python3 scripts/run_hardware_benchmarks.py
-```
-This script automatically utilizes our custom Taylor matrix exponentiation fallback on active GPU devices (`mps` or `cuda`) and falls back gracefully to CPU if no accelerator is present.
-
-### 🖥️ 5. Run on High-Performance Computing (HPC) Clusters
-
-To run the large-scale campaigns (100 seeds) and benchmark runs on a SLURM-managed HPC cluster like ATU's JANUS facility, you can use either the parallel array jobs (recommended for speed) or the sequential single-job scripts:
-
-### Option A: Parallel SLURM Job Arrays (Recommended)
-These scripts split the 100 seeds into 10 parallel sub-jobs (10 seeds each) to utilize cluster parallelism.
-*   **Double-Precision Sweep (100 seeds in parallel):**
-    ```bash
-    sbatch scripts/submit_janus_100_array.sh
-    ```
-*   **Single-Precision Sweep (100 seeds in parallel):**
-    ```bash
-    sbatch scripts/submit_janus_64_array.sh
-    ```
-*Note: After all array tasks finish, you must manually run the summarization script to aggregate the results:*
-```bash
-python3 scripts/summarize_results.py --results-root results/runs
-```
-
-### Option B: Sequential SLURM Jobs
-These scripts run the entire 100-seed campaign sequentially in a single job allocation and automatically run the summarization at the end.
-*   **Both Precisions sequentially (12h limit):**
-    ```bash
-    sbatch scripts/submit_janus.sh
-    ```
-*   **Single-Precision only sequentially (12h limit):**
-    ```bash
-    sbatch scripts/submit_janus_64.sh
-    ```
-
-### Hardware Benchmark
-To run the hardware dimension scaling benchmark on a GPU node:
-```bash
-sbatch scripts/submit_janus_benchmark.sh
-```
-
-These scripts automate resource allocation, environment activation, multi-seed campaigns, and timing runs on the cluster, outputting logs and results directly to the `results/` folder.
-
-
 ## License
 
 The software code in this repository is licensed under the Apache License 2.0.
