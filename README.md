@@ -1,18 +1,17 @@
 # A Reproducible Software Workflow for Unanchored Approximate MUB Optimization: A Case Study in Dimension Six
+Archived Software DOI: [![DOI](https://zenodo.org/badge/1254818033.svg)](https://doi.org/10.5281/zenodo.20689038)
 
 This repository accompanies the manuscript:
 
-**A Reproducible Software Workflow for Unanchored Approximate MUB Optimization: A Dimension-Six Case Study**
+**A Reproducible Software Workflow for Unanchored Approximate MUB Optimization: A Dimension Six Case Study**
 
 Authors: Abdul Fatah, Ian McLoughlin, and Saim Ghafoor
 
 - GitHub repository: https://github.com/fatahjamro/amub-optimization-software
-- Archived software DOI: [![DOI](https://zenodo.org/badge/1254818033.svg)](https://doi.org/10.5281/zenodo.20689038) (Concept) / [10.5281/zenodo.20689039](https://doi.org/10.5281/zenodo.20689039) (v1.0.0)
-- Manuscript / arXiv: **[insert arXiv link after posting]**
-- Data archive DOI, if separate: **[insert data DOI if applicable]**
-
+- Concept DOI: https://doi.org/10.5281/zenodo.20689038
+- Version DOI (v1.0.0): https://doi.org/10.5281/zenodo.20689039
+- Manuscript / arXiv: **TBD**
 ---
-
 ## Overview
 
 This repository implements a reproducible, parameter-driven workflow for optimizing approximate mutually unbiased basis configurations. Candidate bases are represented through a Lie-algebra unitary parameterization,
