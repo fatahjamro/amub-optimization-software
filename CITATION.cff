@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "amub-optimization-software: Reproducible Software Workflow for Unanchored Approximate MUB Optimization"
+title: "amub-optimization-software: A Reproducible Software Workflow for Unanchored Approximate MUB Optimization: A Case Study in Dimension Six"
 message: "If you use this software in your research, please cite it using the metadata from this file."
 type: software
 authors:

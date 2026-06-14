@@ -20,7 +20,7 @@ pip install -r requirements.txt
 ### Option B: Conda Environment
 ```bash
 conda env create -f environment.yml
-conda activate d6mub-optimization
+conda activate amub-optimization-software
 ```
 
 ---
@@ -66,20 +66,39 @@ This automatically routes the matrix exponentiation to the custom Taylor-series 
 
 ## 6. High-Performance Computing (HPC) Execution
 
-To reproduce the full 100-seed campaigns (seeds $0, \dots, 99$) on a SLURM-managed HPC cluster (like the ATU JANUS facility), submit the provided array and benchmark scripts:
+To reproduce the full 100-seed campaigns (seeds $0, \dots, 99$) on a SLURM-managed HPC cluster (like the ATU JANUS facility), you can use either the parallel array jobs (recommended for speed) or the sequential single-job scripts:
 
-*   **Double-Precision Campaign (100 Seeds):**
+### Option A: Parallel SLURM Job Arrays (Recommended)
+These scripts split the 100 seeds into 10 parallel sub-jobs (10 seeds each) to utilize cluster parallelism.
+*   **Double-Precision Sweep (100 seeds in parallel):**
     ```bash
     sbatch scripts/submit_janus_100_array.sh
     ```
-*   **Single-Precision Campaign (100 Seeds):**
+*   **Single-Precision Sweep (100 seeds in parallel):**
     ```bash
     sbatch scripts/submit_janus_64_array.sh
     ```
-*   **Hardware Benchmark Suite:**
+*Note: After all array tasks finish, you must manually run the summarization script to aggregate the results:*
+```bash
+python3 scripts/summarize_results.py --results-root results/runs
+```
+
+### Option B: Sequential SLURM Jobs
+These scripts run the entire 100-seed campaign sequentially in a single job allocation and automatically run the summarization at the end.
+*   **Both Precisions sequentially (12h limit):**
     ```bash
-    sbatch scripts/submit_janus_benchmark.sh
+    sbatch scripts/submit_janus.sh
     ```
+*   **Single-Precision only sequentially (12h limit):**
+    ```bash
+    sbatch scripts/submit_janus_64.sh
+    ```
+
+### Hardware Benchmark
+To run the hardware dimension scaling benchmark on a GPU node:
+```bash
+sbatch scripts/submit_janus_benchmark.sh
+```
 
 ---
 

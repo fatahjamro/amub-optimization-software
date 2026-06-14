@@ -1,4 +1,4 @@
-name: d6mub-optimization
+name: amub-optimization-software
 channels:
   - pytorch
   - conda-forge

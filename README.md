@@ -172,7 +172,7 @@ pip install -r requirements.txt
 #### Option B: Conda Environment
 ```bash
 conda env create -f environment.yml
-conda activate d6mub-optimization
+conda activate amub-optimization-software
 ```
 
 ---
@@ -205,19 +205,41 @@ python3 scripts/run_hardware_benchmarks.py
 This script automatically utilizes our custom Taylor matrix exponentiation fallback on active GPU devices (`mps` or `cuda`) and falls back gracefully to CPU if no accelerator is present.
 
 ### 🖥️ 5. Run on High-Performance Computing (HPC) Clusters
-To run the large-scale campaigns (100 seeds) and benchmark runs on a SLURM-managed HPC cluster like ATU's JANUS facility, submit the provided batch scripts:
-*   **Double-Precision Sweep (100 seeds):**
+
+To run the large-scale campaigns (100 seeds) and benchmark runs on a SLURM-managed HPC cluster like ATU's JANUS facility, you can use either the parallel array jobs (recommended for speed) or the sequential single-job scripts:
+
+### Option A: Parallel SLURM Job Arrays (Recommended)
+These scripts split the 100 seeds into 10 parallel sub-jobs (10 seeds each) to utilize cluster parallelism.
+*   **Double-Precision Sweep (100 seeds in parallel):**
     ```bash
     sbatch scripts/submit_janus_100_array.sh
     ```
-*   **Single-Precision Sweep (100 seeds):**
+*   **Single-Precision Sweep (100 seeds in parallel):**
     ```bash
     sbatch scripts/submit_janus_64_array.sh
     ```
-*   **Hardware Benchmark:**
+*Note: After all array tasks finish, you must manually run the summarization script to aggregate the results:*
+```bash
+python3 scripts/summarize_results.py --results-root results/runs
+```
+
+### Option B: Sequential SLURM Jobs
+These scripts run the entire 100-seed campaign sequentially in a single job allocation and automatically run the summarization at the end.
+*   **Both Precisions sequentially (12h limit):**
     ```bash
-    sbatch scripts/submit_janus_benchmark.sh
+    sbatch scripts/submit_janus.sh
     ```
+*   **Single-Precision only sequentially (12h limit):**
+    ```bash
+    sbatch scripts/submit_janus_64.sh
+    ```
+
+### Hardware Benchmark
+To run the hardware dimension scaling benchmark on a GPU node:
+```bash
+sbatch scripts/submit_janus_benchmark.sh
+```
+
 These scripts automate resource allocation, environment activation, multi-seed campaigns, and timing runs on the cluster, outputting logs and results directly to the `results/` folder.
 
 

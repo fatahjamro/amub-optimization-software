@@ -18,7 +18,7 @@ END_SEED=$((START_SEED + 9))
 SEEDS=$(seq -s ' ' $START_SEED $END_SEED)
 
 echo "================================================================="
-2echo "Starting AMUB 10-Seed complex64 Campaign (Array Task $SLURM_ARRAY_TASK_ID) on JANUS"
+echo "Starting AMUB 10-Seed complex64 Campaign (Array Task $SLURM_ARRAY_TASK_ID) on JANUS"
 echo "Job ID: $SLURM_JOB_ID (Array Job ID: $SLURM_ARRAY_JOB_ID, Task ID: $SLURM_ARRAY_TASK_ID)"
 echo "Running on Node: $SLURM_NODENAME"
 echo "Seeds: $SEEDS"

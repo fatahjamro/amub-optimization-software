@@ -28,17 +28,18 @@
 
 \opening{Dear Editors,}
 
-We are pleased to submit our manuscript entitled \textbf{``A Generalized Software Workflow for Unanchored Approximate MUB Optimization: A Case Study in Dimension Six''} for consideration for publication in \textit{Quantum}.
+We are pleased to submit our manuscript entitled \textbf{``A Reproducible Software Workflow for Unanchored Approximate MUB Optimization: A Case Study in Dimension Six''} for consideration for publication in \textit{Quantum}.
 
 Our work addresses a classical, longstanding challenge in quantum information theory and finite-dimensional Hilbert space geometry: the existence of a complete set of seven Mutually Unbiased Bases (MUBs) in dimension six ($d=6$). We approach this from a mathematical software perspective by introducing an unanchored optimization workflow that utilizes automatic differentiation and Lie-algebra exponentiation to search for approximate configurations.
 
-We believe our manuscript is an excellent fit for \textit{Quantum}, as it provides rigorous numerical evidence for a problem central to quantum information theory, while introducing precision-aware computational tools for high-dimensional quantum combinatorial design searches:
+We believe our manuscript is an excellent fit for \textit{Quantum}, as it provides rigorous numerical evidence for a problem central to quantum information theory, while introducing precision-aware computational tools and a hardware execution check for high-dimensional quantum combinatorial design searches:
 
 \begin{itemize}
-    \item \textbf{Unanchored AMUB Formulation:} We study a fully unanchored optimization problem, exposing structural patterns and showing numerical evidence of a transition to fully defective configurations beginning at five bases in dimension six.
-    \item \textbf{Hardware-Accelerated Exponentiation Layer:} To support GPU acceleration natively, we developed a highly portable complex matrix Taylor-series exponentiation layer, bypassing backend limitations while maintaining strict truncation error bounds.
-    \item \textbf{Precision-Aware Landscape Analysis:} We conduct a thorough analysis contrasting double-precision (\texttt{complex128}) reference runs with single-precision (\texttt{complex64}) implementations, demonstrating how precision impacts near-exact pair classifications and optimization basin selection.
-    \item \textbf{Reproducible Software Workflow:} Our methodology is packaged as a modern, reproducible workflow leveraging Python, PyTorch, and interactive notebooks. All optimization seeds, overlap tensors, diagnostics, and resulting basis matrices are fully archived and publicly exportable, allowing independent verification by the quantum computing community.
+    \item \textbf{Unanchored AMUB Formulation:} We parameterize unitary bases using Lie-algebra exponentiation to optimize all candidate bases simultaneously. This unanchored approach avoids bias from canonical anchors and exposes recurrent structures, such as a four-basis partial-exact hub-and-triangle configuration.
+    \item \textbf{Matrix Exponentiation Policy:} To support accelerator backends (GPU/MPS/CUDA) where native complex matrix exponentiation is unavailable, the workflow integrates a Taylor-series matrix-exponential layer with explicit truncation error bounds and safeguards.
+    \item \textbf{Precision-Aware Landscape Analysis:} We contrast double-precision (\texttt{complex128}) reference campaigns with single-precision (\texttt{complex64}) sweeps, illustrating the stability of the defective transition for $n \ge 5$ and the precision-sensitivity of basin selection and pair classification.
+    \item \textbf{Physical QPU Execution Check:} We map the optimized dimension-six bases to three-qubit circuits and execute them on the 156-qubit Heron processor \texttt{ibm\_marrakesh}, analyzing the compiled circuit complexity and assessing how physical gate noise impacts our computational predictions.
+    \item \textbf{Reproducible and Open-Source Workflow:} All experiments, configurations, and results are packaged as a reproducible open-source workflow using Python and PyTorch. The complete codebase and results are publicly hosted at \url{https://github.com/fatahjamro/amub-optimization-software}, enabling independent verification and extension.
 \end{itemize}
 
 This manuscript has not been published elsewhere and is not under consideration by any other journal. All authors have read and approved the final manuscript for submission. 
