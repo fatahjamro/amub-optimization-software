@@ -46,6 +46,7 @@ pythontex-files-*/
 .DS_Store
 **/.DS_Store
 Thumbs.db
+*.zip
 
 # VS Code - Tracking settings but ignoring history
 .vscode/*
